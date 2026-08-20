@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Category {
+  WALALOO
+  DURDURII
+  ASOOSAMA
+  OOLMAA
+  SAGALEE
+}
+
+enum ReactionType {
+  LIKE
+  UNICORN
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  username  String     @unique
+  name      String
+  password  String
+  bio       String?
+  avatarUrl String?
+  role      Role       @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  articles  Article[]
+  comments  Comment[]
+  reactions Reaction[]
+  bookmarks Bookmark[]
+
+  notificationsReceived  Notification[] @relation("UserNotifications")
+  notificationsTriggered Notification[] @relation("ActorNotifications")
+
+  @@map("users")
+}
+
+model Article {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  title         String
+  content       String       @db.Text
+  excerpt       String?
+  coverImageUrl String?
+  audioUrl      String?
+  category      Category     @default(ASOOSAMA)
+  readingTime   Int          @default(1)
+  published     Boolean      @default(false)
+  featured      Boolean      @default(false)
+  viewCount     Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  authorId      String
+  author        User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  tags          ArticleTag[]
+  comments      Comment[]
+  reactions     Reaction[]
+  bookmarks     Bookmark[]
+
+  @@map("articles")
+}
+
+model Tag {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  slug      String       @unique
+  color     String?
+  createdAt DateTime     @default(now())
+  articles  ArticleTag[]
+
+  @@map("tags")
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@map("article_tags")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  authorId  String
+  articleId String
+  parentId  String?
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+model Reaction {
+  id        String       @id @default(cuid())
+  type      ReactionType
+  createdAt DateTime     @default(now())
+  userId    String
+  articleId String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId, type])
+  @@map("reactions")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  articleId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@map("bookmarks")
+}
+
+enum NotificationType {
+  LIKE
+  UNICORN
+  COMMENT
+  SYSTEM
+}
+
+model Notification {
+  id      String           @id @default(uuid())
+  userId  String // The user who receives the notification
+  actorId String? // The user who triggered the notification (optional for system notifications)
+  type    NotificationType
+  message String
+  isRead  Boolean          @default(false)
+  link    String? // Link to the related resource (e.g., article url)
+
+  user  User  @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("ActorNotifications", fields: [actorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
