@@ -1,9 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import http from 'http';
 import { Server } from 'socket.io';
-
 import authRoutes from './routes/auth';
 import articleRoutes from './routes/articles';
 import tagRoutes from './routes/tags';
@@ -50,13 +49,13 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Siidaa Barruu API is running' });
 });
 
 // Start server
 server.listen(PORT, () => {
-  console.log(`🚀 Siidaa Barruu server running on port ${PORT}`);
+  console.log(`🚀 Barruu server running on port ${PORT}`);
 });
 
 export default app;

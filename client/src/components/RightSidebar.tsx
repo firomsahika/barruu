@@ -11,35 +11,19 @@ export default function RightSidebar() {
   useEffect(() => {
     api.get('/articles?sort=top&limit=5')
       .then((res) => setTrending(res.data.articles || []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   return (
     <aside>
       {/* Trending section */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          marginBottom: '16px',
-        }}
-      >
-        <div
-          style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid #e5e7eb',
-            fontWeight: 700,
-            fontSize: '15px',
-            color: '#08090a',
-          }}
-        >
-          #walaloo-filatamaa
+      <div className="mb-4 overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-200 px-4 py-3 text-sm font-bold text-[#08090a]">
+          #Walaloo-filatamaa
         </div>
 
         {trending.length === 0 ? (
-          <div style={{ padding: '16px', fontSize: '14px', color: '#9ca3af' }}>
+          <div className="p-4 text-xs text-gray-400">
             Barruuwwan hin jiran.
           </div>
         ) : (
@@ -47,37 +31,16 @@ export default function RightSidebar() {
             <Link
               key={article.id}
               href={`/article/${article.slug}`}
-              style={{
-                display: 'block',
-                padding: '12px 16px',
-                textDecoration: 'none',
-                borderBottom: i < trending.length - 1 ? '1px solid #f3f4f6' : 'none',
-                transition: 'background 0.1s',
-              }}
-              className="hover:bg-gray-50"
+              className={`block px-4 py-3 no-underline transition-colors duration-100 hover:bg-gray-50 ${i < trending.length - 1 ? 'border-b border-gray-100' : ''
+                }`}
             >
-              <div
-                style={{
-                  fontSize: '13px',
-                  color: '#6b7280',
-                  marginBottom: '4px',
-                  fontWeight: 500,
-                }}
-              >
+              <div className="mb-1 text-[13px] font-medium text-gray-500">
                 {article.author.name}
               </div>
-              <div
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: '#08090a',
-                  lineHeight: 1.4,
-                  marginBottom: '4px',
-                }}
-              >
+              <div className="mb-1 text-sm font-bold leading-snug text-[#08090a]">
                 {article.title}
               </div>
-              <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+              <div className="text-xs text-gray-400">
                 ❤️ {article._count.reactions} simsiree · 💬 {article._count.comments} yaada
               </div>
             </Link>
@@ -86,59 +49,27 @@ export default function RightSidebar() {
       </div>
 
       {/* Studio spot card */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          borderRadius: '8px',
-          padding: '20px',
-          color: '#ffffff',
-          marginBottom: '16px',
-        }}
-      >
-        <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', marginBottom: '8px', opacity: 0.8 }}>
+      <div className="mb-4 rounded-lg bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 text-white">
+        <div className="mb-2 text-[11px] font-bold uppercase tracking-wider opacity-80">
           MIJUU STUDIO SPOT
         </div>
-        <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 8px', lineHeight: 1.3 }}>
+        <h3 className="mb-2 text-base font-extrabold leading-snug">
           Barruu Kee Publish Godhi
         </h3>
-        <p style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.6, margin: '0 0 14px' }}>
+        <p className="mb-3.5 text-[13px] leading-relaxed opacity-90">
           Yaada kee dubbistoota kuma hedduuf hirmaachisi. Amma barreessuu jalqabi!
         </p>
         <Link
           href="/write"
-          style={{
-            display: 'inline-block',
-            padding: '8px 16px',
-            backgroundColor: '#ffffff',
-            color: '#7c3aed',
-            borderRadius: '6px',
-            textDecoration: 'none',
-            fontSize: '13px',
-            fontWeight: 700,
-          }}
+          className="inline-block rounded-md bg-white px-4 py-2 text-[13px] font-bold text-purple-700 no-underline transition-opacity hover:opacity-95"
         >
           Barreessi Amma →
         </Link>
       </div>
 
       {/* Popular categories */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid #e5e7eb',
-            fontWeight: 700,
-            fontSize: '15px',
-            color: '#08090a',
-          }}
-        >
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-200 px-4 py-3 text-xs font-bold text-[#08090a]">
           Akaakuuwwan Barruutii
         </div>
         {[
@@ -151,17 +82,10 @@ export default function RightSidebar() {
           <Link
             key={cat.href}
             href={cat.href}
-            style={{
-              display: 'block',
-              padding: '10px 16px',
-              textDecoration: 'none',
-              borderBottom: '1px solid #f3f4f6',
-              transition: 'background 0.1s',
-            }}
-            className="hover:bg-gray-50"
+            className="block border-b border-gray-100 px-4 py-2.5 no-underline transition-colors duration-100 hover:bg-gray-50 last:border-b-0"
           >
-            <div style={{ fontSize: '14px', fontWeight: 600, color: '#08090a' }}>{cat.label}</div>
-            <div style={{ fontSize: '12px', color: '#9ca3af' }}>{cat.desc}</div>
+            <div className="text-xs font-bold text-[#08090a]">{cat.label}</div>
+            <div className="text-xs text-gray-400">{cat.desc}</div>
           </Link>
         ))}
       </div>
