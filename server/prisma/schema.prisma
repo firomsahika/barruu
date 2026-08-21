@@ -122,6 +122,8 @@ model Comment {
   article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
   parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentReplies")
+  reactions Reaction[]
+  bookmarks Bookmark[]
 
   @@map("comments")
 }
@@ -132,8 +134,10 @@ model Reaction {
   createdAt DateTime     @default(now())
   userId    String
   articleId String
+  commentId String?
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   article   Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  comment   Comment      @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([userId, articleId, type])
   @@map("reactions")

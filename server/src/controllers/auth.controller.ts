@@ -33,20 +33,6 @@ export class AuthController {
     }
   }
 
-  static async me(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user?.id;
-      if (!userId) {
-        res.status(401).json({ error: 'Hin seenin' });
-        return;
-      }
-      const user = await AuthService.getCurrentUser(userId);
-      res.json(user);
-    } catch (error: any) {
-      console.error('Me error:', error);
-      res.status(404).json({ error: error.message || 'Fayyadamaan hin argamne' });
-    }
-  }
 
   static async forgotPassword(req: Request, res: Response): Promise<void> {
     try {
@@ -97,32 +83,7 @@ export class AuthController {
     }
   }
 
-  static async getOtherProfile(req: Request, res: Response): Promise<void> {
-    try {
-      // Extract the specific ID parameter from req.params (e.g., /users/:id or /users/:userId)
-      const rawId = req.params.id;
-
-      const id = Array.isArray(rawId) ? rawId[0] : rawId;
-
-      if (!id) {
-        res.status(400).json({ error: 'Id\'n fayyadamaa ni barbaachisa' });
-        return;
-      }
-
-      const user = await AuthService.getOtherProfile(id);
-
-      res.status(200).json(user);
-    } catch (error: any) {
-      console.error('Get other profile error:', error);
-
-      if (error.message === 'USER_NOT_FOUND') {
-        res.status(404).json({ error: 'Fayyadamaan hin argamne' });
-        return;
-      }
-
-      res.status(500).json({ error: 'Dogoggora keessoo meeshaa' });
-    }
-  }
+ 
 
 
 }

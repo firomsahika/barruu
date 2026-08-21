@@ -11,6 +11,11 @@ export const createArticleSchema = z.object({
   published: z.boolean().optional(),
 });
 
-export const updateArticleSchema = createArticleSchema.partial().extend({
-  featured: z.boolean().optional(),
-});
+export const updateArticleSchema = createArticleSchema
+  .partial()
+  .extend({
+    featured: z.boolean().optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'Yoo xiqqaate gosa odeeffannoo tokko fooyyessuu qabda', // Ensure at least one field is provided for update
+  });

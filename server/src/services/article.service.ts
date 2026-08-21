@@ -5,7 +5,7 @@ import { createArticleSchema, updateArticleSchema } from '../validations/article
 
 export class ArticleService {
   static calculateReadingTime(content: string): number {
-    const wordsPerMinute = 200;
+    const wordsPerMinute = 100;
     const wordCount = content.split(/\\s+/).length;
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
   }
@@ -67,6 +67,7 @@ export class ArticleService {
     ]);
 
     let articlesWithStatus = articles;
+
     if (userId) {
       const reactionData = await prisma.reaction.findMany({
         where: { userId, articleId: { in: articles.map(a => a.id) } }
@@ -202,5 +203,317 @@ export class ArticleService {
     });
   }
 
-  // ... Update, Delete, React, Bookmark can be similarly moved here
+  static async updateArticle(data: z.infer<typeof updateArticleSchema>, userId: string, articleId: string) {
+    // 1. Fetch existing article to verify ownership and existing values
+    const existingArticle = await prisma.article.findUnique({
+      where: { id: articleId },
+    });
+
+    if (!existingArticle) {
+      throw new Error('ARTICLE_NOT_FOUND');
+    }
+
+    if (existingArticle.authorId !== userId) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    // 2. Destructure optional update fields
+    const { title, content, excerpt, coverImageUrl, audioUrl, category, tags, published, featured } = data;
+
+    // 3. Handle slug update ONLY if title was provided and actually changed
+    let slug = existingArticle.slug;
+    if (title && title !== existingArticle.title) {
+      const baseSlug = slugify(title, { lower: true });
+      slug = baseSlug;
+      let counter = 1;
+
+      while (await prisma.article.findUnique({ where: { slug } })) {
+        slug = `${baseSlug}-${counter++}`;
+      }
+    }
+
+    // 4. Handle reading time ONLY if content was updated
+    const readingTime = content ? this.calculateReadingTime(content) : undefined;
+
+    // 5. Handle tags update ONLY if tags array was explicitly passed
+    let tagsUpdate = undefined;
+    if (tags) {
+      // Delete old join records and re-create new ones
+      tagsUpdate = {
+        deleteMany: {},
+        create: await Promise.all(
+          tags.map(async (tagName: string) => {
+            const tagSlug = slugify(tagName, { lower: true });
+            const tag = await prisma.tag.upsert({
+              where: { slug: tagSlug },
+              update: {},
+              create: { name: tagName, slug: tagSlug },
+            });
+            return { tagId: tag.id };
+          })
+        ),
+      };
+    }
+
+    // 6. Execute dynamic update
+    return prisma.article.update({
+      where: { id: articleId },
+      data: {
+        ...(title !== undefined && { title }),
+        ...(title !== undefined && { slug }),
+        ...(content !== undefined && { content }),
+        ...(readingTime !== undefined && { readingTime }),
+        ...(excerpt !== undefined && { excerpt }),
+        ...(coverImageUrl !== undefined && { coverImageUrl }),
+        ...(audioUrl !== undefined && { audioUrl }),
+        ...(category !== undefined && { category }),
+        ...(published !== undefined && { published: Boolean(published) }),
+        ...(featured !== undefined && { featured: Boolean(featured) }),
+        ...(tagsUpdate && { tags: tagsUpdate }),
+      },
+      include: {
+        author: { select: { id: true, name: true, username: true, avatarUrl: true } },
+        tags: { include: { tag: true } },
+        _count: { select: { reactions: true, comments: true } },
+      },
+    });
+  }
+
+  static async deleteArticle(articleId: string, userId: string) {
+    const article = await prisma.article.findUnique({
+      where: { id: articleId },
+    });
+
+    if (!article) {
+      throw new Error('ARTICLE_NOT_FOUND');
+    }
+
+    if (article.authorId !== userId) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    return prisma.article.delete({
+      where: { id: articleId },
+    });
+  }
+
+  // react to article like or unicorn
+  static async reactArticle(
+    articleId: string,
+    userId: string,
+    type: 'LIKE' | 'UNICORN'
+  ) {
+    // 1. Ensure article exists
+    const article = await prisma.article.findUnique({
+      where: { id: articleId },
+    });
+
+    if (!article) {
+      throw new Error('ARTICLE_NOT_FOUND');
+    }
+
+    // 2. Check if reaction already exists
+    const existingReaction = await prisma.reaction.findUnique({
+      where: {
+        userId_articleId_type: {
+          userId,
+          articleId,
+          type,
+        },
+      },
+    });
+
+    // 3. Toggle: Delete if it exists, Create if it doesn't
+    if (existingReaction) {
+      await prisma.reaction.delete({
+        where: { id: existingReaction.id },
+      });
+
+      return { action: 'REMOVED', type };
+    } else {
+      const newReaction = await prisma.reaction.create({
+        data: {
+          userId,
+          articleId,
+          type,
+        },
+      });
+
+      return { action: 'ADDED', reaction: newReaction };
+    }
+  }
+
+  // comment article 
+
+  static async commentArticle(
+    articleId: string,
+    userId: string,
+    content: string,
+    parentId?: string
+  ) {
+    // 1. Input sanitization
+    const trimmedContent = content?.trim();
+    if (!trimmedContent) {
+      throw new Error('INVALID_COMMENT_CONTENT');
+    }
+
+    // 2. Verify article exists
+    const articleExists = await prisma.article.findUnique({
+      where: { id: articleId },
+      select: { id: true },
+    });
+
+    if (!articleExists) {
+      throw new Error('ARTICLE_NOT_FOUND');
+    }
+
+    // 3. If it's a reply, verify parent comment exists and belongs to the same article
+    if (parentId) {
+      const parentComment = await prisma.comment.findUnique({
+        where: { id: parentId },
+        select: { id: true, articleId: true },
+      });
+
+      if (!parentComment || parentComment.articleId !== articleId) {
+        throw new Error('PARENT_COMMENT_NOT_FOUND');
+      }
+    }
+
+    // 4. Create comment using correct foreign keys matching your model
+    return prisma.comment.create({
+      data: {
+        content: trimmedContent,
+        articleId,
+        authorId: userId, // Matches 'authorId' in your Comment model
+        parentId: parentId || null,
+      },
+      include: {
+        author: { // Matches 'author' relation in your Comment model
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        _count: {
+          select: {
+            replies: true,
+          },
+        },
+      },
+    });
+  }
+
+  // get All comments
+  static async getAllComments(articleId: string) {
+    return prisma.comment.findMany({
+      where: { articleId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        _count: {
+          select: {
+            replies: true,
+          },
+        },
+      },
+    });
 }
+
+ // delete comment by comment Id
+  static async deleteComment(commentId: string, userId: string) {
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment) {
+      throw new Error('COMMENT_NOT_FOUND');
+    }
+
+    if(comment.authorId !== userId){
+      throw new Error('UNAUTHORIZED');
+    }
+
+    return prisma.comment.delete({
+      where: { id: commentId },
+    });
+  }
+
+
+  // get replies
+  static async getReplies(commentId: string) {
+    return prisma.comment.findMany({
+      where: { parentId: commentId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        _count: {
+          select: {
+            replies: true,
+          },
+        },
+      },
+    });
+} 
+
+  // deleteReply
+  static async deleteReply(replyId: string, userId: string){
+    const reply = await prisma.comment.findUnique({
+      where: { id: replyId },
+    });
+
+    if (!reply) {
+      throw new Error('REPLY_NOT_FOUND');
+    }
+
+    if(reply.authorId !== userId){
+      throw new Error('UNAUTHORIZED');
+    }
+
+    return prisma.comment.delete({
+      where: { id: replyId },
+    }); 
+  }
+
+  // like comment
+  // static async likeComment(commentId: string, userId: string) {
+  //   return prisma.comment.update({
+  //     where: { id: commentId },
+  //     data: {
+  //       likes: {
+  //         connect: { id: userId },
+  //       },
+  //     },
+  //   });
+  // }
+
+  // unlike comment
+  // static async unlikeComment(commentId: string, userId: string) {
+  //   return prisma.comment.update({
+  //     where: { id: commentId },
+  //     data: {
+  //       likes: {
+  //         disconnect: { id: userId },
+  //       },
+  //     },
+  //   });
+  // }
+
+
+
+}
+
+
