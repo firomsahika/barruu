@@ -1,4 +1,4 @@
-import Router from 'express'
+import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
 import { authenticate } from '../middleware/auth';
 
@@ -15,3 +15,5 @@ router.get('/bookmarks', authenticate, UserController.getUserBookmarks);
 router.get('/drafts', authenticate, UserController.getUserDrafts);
 router.get('/followers', authenticate, UserController.getFollowers);
 router.get('/following', authenticate, UserController.getFollowing);
+
+export default router;

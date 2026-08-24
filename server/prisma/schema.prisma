@@ -29,20 +29,22 @@ enum ReactionType {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  username  String     @unique
-  name      String
-  password  String
-  bio       String?
-  avatarUrl String?
-  role      Role       @default(USER)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  articles  Article[]
-  comments  Comment[]
-  reactions Reaction[]
-  bookmarks Bookmark[]
+  id                  String     @id @default(cuid())
+  email               String     @unique
+  username            String     @unique
+  name                String
+  password            String
+  bio                 String?
+  avatarUrl           String?
+  role                Role       @default(USER)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  resetTokenHash      String?
+  resetTokenExpiresAt DateTime?
+  articles            Article[]
+  comments            Comment[]
+  reactions           Reaction[]
+  bookmarks           Bookmark[]
 
   notificationsReceived  Notification[] @relation("UserNotifications")
   notificationsTriggered Notification[] @relation("ActorNotifications")
@@ -111,19 +113,18 @@ model ArticleTag {
 }
 
 model Comment {
-  id        String    @id @default(cuid())
-  content   String    @db.Text
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String     @id @default(cuid())
+  content   String     @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   authorId  String
   articleId String
   parentId  String?
-  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies   Comment[] @relation("CommentReplies")
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  article   Article    @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  parent    Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[]  @relation("CommentReplies")
   reactions Reaction[]
-  bookmarks Bookmark[]
 
   @@map("comments")
 }
@@ -137,7 +138,7 @@ model Reaction {
   commentId String?
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   article   Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  comment   Comment      @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  comment   Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([userId, articleId, type])
   @@map("reactions")

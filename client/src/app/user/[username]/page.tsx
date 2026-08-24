@@ -9,6 +9,8 @@ import ArticleCard from '@/components/ArticleCard';
 import api from '@/lib/api';
 import { Article, getAvatarUrl, formatDate, CATEGORY_LABELS } from '@/types';
 import { useAuthStore } from '@/store/authStore';
+import { useFollowUser, useFollowing } from '@/hooks/useUserActions';
+import toast from 'react-hot-toast';
 
 interface UserProfile {
   id: string;
@@ -29,6 +31,9 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<'articles' | 'comments'>('articles');
+  const [isFollowing, setIsFollowing] = useState(false);
+  const { data: following = [] } = useFollowing(!!currentUser);
+  const followUser = useFollowUser();
 
   useEffect(() => {
     api.get(`/users/${username}`)
@@ -61,6 +66,23 @@ export default function UserProfilePage() {
   }
 
   const isOwnProfile = currentUser?.username === username;
+
+  useEffect(() => {
+    setIsFollowing(following.some((followed) => followed.id === profile.id));
+  }, [following, profile.id]);
+
+  const handleFollow = async () => {
+    if (!currentUser) {
+      toast.error('Namoota hordofuuf seeni.');
+      return;
+    }
+    try {
+      await followUser.mutateAsync({ followeeId: profile.id, following: isFollowing });
+      setIsFollowing(!isFollowing);
+    } catch (error: unknown) {
+      toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Hordofuu hin dandeenye.');
+    }
+  };
 
   return (
     <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
@@ -153,6 +175,15 @@ export default function UserProfilePage() {
               >
                 Profile Gulaali
               </Link>
+            )}
+            {currentUser && !isOwnProfile && (
+              <button
+                onClick={handleFollow}
+                disabled={followUser.isPending}
+                style={{ padding: '8px 16px', border: 'none', borderRadius: '6px', color: '#ffffff', backgroundColor: isFollowing ? '#6b7280' : '#3b49df', fontWeight: 600, cursor: 'pointer' }}
+              >
+                {followUser.isPending ? '...' : isFollowing ? 'Hordofuu dhaabi' : 'Hordofi'}
+              </button>
             )}
           </div>
 

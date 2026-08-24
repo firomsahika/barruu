@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Check } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 
@@ -50,22 +50,16 @@ export default function RegisterPage() {
   };
   const strength = passwordStrength();
 
-  const benefits = [
-    'Walaloo, Durdurii fi Asoosama maxxansi',
-    'Walitti dhufeenya uumi',
-    'Barruu kuusi & simsiir',
-  ];
-
   return (
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#f3f4f6',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
+        padding: '20px 16px',
       }}
     >
       <Link
@@ -74,64 +68,41 @@ export default function RegisterPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '48px',
-          height: '48px',
-          backgroundColor: '#08090a',
-          borderRadius: '8px',
+          width: '44px',
+          height: '44px',
+          backgroundColor: '#3b49df',
+          borderRadius: '10px',
           color: '#ffffff',
           fontWeight: 800,
-          fontSize: '16px',
+          fontSize: '13px',
           textDecoration: 'none',
-          marginBottom: '24px',
+          marginBottom: '18px',
         }}
       >
-        S|B
+        B
       </Link>
 
       <h1
         style={{
-          fontSize: '28px',
+          fontSize: '22px',
           fontWeight: 800,
           color: '#08090a',
-          marginBottom: '4px',
+          marginBottom: '6px',
           textAlign: 'center',
         }}
       >
-        Siidaa Barruu Maatii Keenya Makamaa
+        Barruu keessatti galmaa'i
       </h1>
-      <p style={{ color: '#6b7280', fontSize: '15px', marginBottom: '16px', textAlign: 'center' }}>
-        Akaawuntii haaraa uumi, bilisaan!
+      <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '20px', textAlign: 'center' }}>
+        Akaawuntii kee uumii, barruu kee qoodi.
       </p>
-
-      {/* Benefits */}
-      <div style={{ marginBottom: '24px' }}>
-        {benefits.map((b) => (
-          <div key={b} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <div
-              style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                backgroundColor: '#dcfce7',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Check size={12} color="#16a34a" strokeWidth={3} />
-            </div>
-            <span style={{ fontSize: '14px', color: '#4b5563' }}>{b}</span>
-          </div>
-        ))}
-      </div>
 
       <div
         style={{
           backgroundColor: '#ffffff',
           border: '1px solid #e5e7eb',
-          borderRadius: '12px',
-          padding: '32px',
+          borderRadius: '10px',
+          padding: '24px',
           width: '100%',
           maxWidth: '420px',
         }}
@@ -145,7 +116,7 @@ export default function RegisterPage() {
             <div key={field.id} style={{ marginBottom: '16px' }}>
               <label
                 htmlFor={field.id}
-                style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#08090a', marginBottom: '6px' }}
+                style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#08090a', marginBottom: '6px' }}
               >
                 {field.label}
               </label>
@@ -162,7 +133,7 @@ export default function RegisterPage() {
                   padding: '10px 14px',
                   border: '1px solid #e5e7eb',
                   borderRadius: '8px',
-                  fontSize: '15px',
+                  fontSize: '13px',
                   color: '#08090a',
                   outline: 'none',
                   fontFamily: 'inherit',
@@ -173,7 +144,7 @@ export default function RegisterPage() {
                 onBlur={(e) => (e.target.style.borderColor = '#e5e7eb')}
               />
               {field.id === 'username' && form.username && (
-                <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
+                <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
                   Fuulli kee: siidaabarruu.com/user/{form.username}
                 </p>
               )}
@@ -184,7 +155,7 @@ export default function RegisterPage() {
           <div style={{ marginBottom: '24px' }}>
             <label
               htmlFor="password"
-              style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#08090a', marginBottom: '6px' }}
+              style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#08090a', marginBottom: '6px' }}
             >
               Jecha Darbii
             </label>
@@ -202,7 +173,7 @@ export default function RegisterPage() {
                   padding: '10px 40px 10px 14px',
                   border: '1px solid #e5e7eb',
                   borderRadius: '8px',
-                  fontSize: '15px',
+                  fontSize: '13px',
                   color: '#08090a',
                   outline: 'none',
                   fontFamily: 'inherit',
@@ -260,7 +231,7 @@ export default function RegisterPage() {
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
-              fontSize: '16px',
+              fontSize: '13px',
               fontWeight: 700,
               cursor: isLoading ? 'not-allowed' : 'pointer',
               fontFamily: 'inherit',
@@ -270,12 +241,12 @@ export default function RegisterPage() {
             {isLoading ? 'Galmaa\'aa...' : 'Akaawuntii Uumi'}
           </button>
 
-          <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '12px', textAlign: 'center' }}>
-            Galmaa&#39;uun kee Seera Fayyadamaa fi Dhuunfaa keenya wajjin waliigaluu kee agarsiisa.
+          <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '12px', textAlign: 'center' }}>
+            Galmaa&#39;uun kee seera Barruu wajjin waliigaluu kee agarsiisa.
           </p>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#6b7280' }}>
+        <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '12px', color: '#6b7280' }}>
           Dursaa akaawuntii qabdaa?{' '}
           <Link href="/login" style={{ color: '#3b49df', fontWeight: 600, textDecoration: 'none' }}>
             Seeni

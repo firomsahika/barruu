@@ -186,6 +186,9 @@ export default function LoginPage() {
           >
             {isLoading ? 'Seenaa...' : 'Seeni'}
           </button>
+          <Link href="/forgot-password" style={{ display: 'block', marginTop: '12px', textAlign: 'center', color: '#3b49df', fontSize: '13px', textDecoration: 'none' }}>
+            Jecha darbii dagattee?
+          </Link>
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: '#6b7280' }}>

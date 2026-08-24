@@ -35,15 +35,15 @@ export default function HomePage() {
 
       {/* Added responsive horizontal padding with px-4 md:px-10 lg:px-20 */}
       <div
-        className="responsive-grid px-4 md:px-8 lg:px-12"
+        className="responsive-grid px-4 py-5 sm:px-6 lg:px-8"
         style={{
           maxWidth: '1280px',
           margin: '0 auto',
-          paddingTop: '24px',
-          paddingBottom: '24px',
+          paddingTop: '20px',
+          paddingBottom: '32px',
           display: 'grid',
           gridTemplateColumns: '240px 1fr 300px',
-          gap: '24px',
+          gap: '20px',
           alignItems: 'start',
         }}
       >
@@ -55,7 +55,7 @@ export default function HomePage() {
         {/* Main Feed */}
         <main className="space-y-4">
           {/* Top "What's on your mind?" Search Box */}
-          <div className="bg-white border border-gray-200 rounded-md p-3 shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
             <SearchInput placeholder="What's on your mind?" />
           </div>
 
@@ -140,7 +140,7 @@ export default function HomePage() {
               ))}
 
               {page < totalPages && (
-                <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                <div style={{ textAlign: 'center', marginTop: '20px' }}>
                   <button
                     onClick={loadMore}
                     style={{

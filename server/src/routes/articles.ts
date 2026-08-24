@@ -1,11 +1,13 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth';
 import slugify from 'slug';
 import { ArticleController } from '../controllers/article.controller';
 import { NotificationService } from '../services/notification.service';
+import { ArticleService } from '../services/article.service';
 
 const router = Router();
+const calculateReadingTime = ArticleService.calculateReadingTime;
 
 // GET /api/articles - Get all articles with pagination & filtering
 router.get('/', optionalAuth, ArticleController.getArticles);
@@ -139,7 +141,7 @@ router.post('/:id/react', authenticate, async (req: AuthRequest, res: Response):
         userId: article.authorId,
         actorId: req.user!.id,
         type: type === 'LIKE' ? 'LIKE' : 'UNICORN',
-        message: `${req.user!.name} reacted to your article.`,
+        message: `Someone reacted to your article.`,
         link: `/article/${article.slug}`
       });
 
@@ -222,7 +224,7 @@ router.post('/:id/comments', authenticate, async (req: AuthRequest, res: Respons
       userId: article.authorId,
       actorId: req.user!.id,
       type: 'COMMENT',
-      message: `${req.user!.name} commented on your article.`,
+      message: `Someone commented on your article.`,
       link: `/article/${article.slug}#comments`
     });
 

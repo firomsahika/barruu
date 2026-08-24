@@ -17,7 +17,7 @@ export class ArticleController {
 
   static async getArticle(req: Request, res: Response): Promise<void> {
     try {
-      const rawSlug = req.params;
+      const rawSlug = req.params.slug;
       const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
 
       const userId = (req as any).user?.id;
@@ -91,7 +91,7 @@ export class ArticleController {
   //deleteArticle 
   static async deleteArticle(req: Request, res: Response): Promise<void> {
     try {
-      const rawArticleId = req.params;
+      const rawArticleId = req.params.articleId || req.params.id;
       const articleId = Array.isArray(rawArticleId) ? rawArticleId[0] : rawArticleId;
 
       const userId = (req as any).user?.id;
@@ -254,6 +254,48 @@ export class ArticleController {
     }
   }
 
-  //
+  // get replies
+  static async getReplies(req: Request, res: Response): Promise<void> {
+    try {
+      const rawCommentId = req.params.commentId || req.params.id;
+      const commentId = Array.isArray(rawCommentId) ? rawCommentId[0] : rawCommentId;
+
+      if (!commentId) {
+        res.status(400).json({ error: 'Id\'n yaadaa ni barbaachisa' });
+        return;
+      }
+
+      const result = await ArticleService.getReplies(commentId);
+      res.json(result);
+    } catch (error: any) {
+      console.error('Get replies error:', error);
+      res.status(404).json({ error: error.message || 'Deebiiwwan hin argamne' });
+    }
+  }
+
+  // delete reply
+  static async deleteReply(req: Request, res: Response): Promise<void> {
+    try {
+      const rawReplyId = req.params.replyId || req.params.id;
+      const replyId = Array.isArray(rawReplyId) ? rawReplyId[0] : rawReplyId;
+
+      if (!replyId) {
+        res.status(400).json({ error: 'Id\'n deebii ni barbaachisa' });
+        return;
+      }
+
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized!' });
+        return;
+      }
+
+      const result = await ArticleService.deleteReply(replyId, userId);
+      res.json(result);
+    } catch (error: any) {
+      console.error('Delete reply error:', error);
+      res.status(404).json({ error: error.message || 'Deebii hin argamne' });
+    }
+  }
 
 }

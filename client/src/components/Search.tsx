@@ -82,7 +82,7 @@ export default function SearchInput({ placeholder = 'Search...' }: SearchInputPr
               setShowSearch(true);
             }}
             onFocus={() => setShowSearch(true)}
-            className="w-full bg-transparent text-sm font-normal text-gray-900 placeholder:text-gray-400 placeholder:text-xs placeholder:font-light outline-none"
+            className="w-full bg-transparent text-xs font-normal text-gray-900 placeholder:text-gray-400 placeholder:text-xs placeholder:font-light outline-none"
           />
           {searchQuery && (
             <button
@@ -116,7 +116,7 @@ export default function SearchInput({ placeholder = 'Search...' }: SearchInputPr
                 }}
                 className="block px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
               >
-                <div className="text-sm font-medium text-gray-900 leading-snug">
+                <div className="text-xs font-medium text-gray-900 leading-snug">
                   {article.title}
                 </div>
                 <div className="text-xs text-gray-500 font-light mt-0.5">

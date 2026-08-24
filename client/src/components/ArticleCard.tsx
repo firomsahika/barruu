@@ -271,7 +271,7 @@ export default function ArticleCard({ article, featured = false, onUpdate }: Art
         border: '1px solid #e5e7eb',
         borderRadius: '8px',
         padding: '16px',
-        marginBottom: '12px',
+        marginBottom: '10px',
         transition: 'box-shadow 0.1s',
       }}
       className="hover:shadow-sm"
@@ -325,11 +325,11 @@ export default function ArticleCard({ article, featured = false, onUpdate }: Art
         <Link href={`/article/${article.slug}`} style={{ textDecoration: 'none' }}>
           <h2
             style={{
-              fontSize: '18px',
+              fontSize: '19px',
               fontWeight: 700,
               color: '#08090a',
-              lineHeight: 1.35,
-              margin: '0 0 6px',
+              lineHeight: 1.3,
+              margin: '0 0 7px',
             }}
             className="hover:text-blue-700"
           >

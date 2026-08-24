@@ -140,20 +140,21 @@ export class ArticleService {
       unicorns: article.reactions.filter(r => r.type === 'UNICORN').length,
     };
 
-    let userReactions = { liked: false, unicorned: false, bookmarked: false };
+    let userReactions = { liked: false, unicorned: false };
+    let userBookmarked = false;
     if (userId) {
       const userRx = article.reactions.filter(r => r.userId === userId);
       const bookmarked = await prisma.bookmark.findUnique({
         where: { userId_articleId: { userId, articleId: article.id } }
       });
+      userBookmarked = !!bookmarked;
       userReactions = {
         liked: userRx.some(r => r.type === 'LIKE'),
         unicorned: userRx.some(r => r.type === 'UNICORN'),
-        bookmarked: !!bookmarked,
       };
     }
 
-    return { ...article, reactionCounts, userReactions };
+    return { ...article, reactionCounts, userReactions, userBookmarked };
   }
 
   static async createArticle(data: z.infer<typeof createArticleSchema>, userId: string) {
@@ -511,8 +512,6 @@ export class ArticleService {
   //     },
   //   });
   // }
-
-
 
 }
 

@@ -1,8 +1,24 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service';
-import { registerSchema, loginSchema, forgotPasswordSchema } from '../validations/auth.validation';
+import { UserService } from '../services/user.service';
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validations/auth.validation';
 
 export class AuthController {
+  static async me(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Hin seenin' });
+        return;
+      }
+      const user = await UserService.me(userId);
+      res.json(user);
+    } catch (error: any) {
+      console.error('Me error:', error);
+      res.status(404).json({ error: error.message || 'Fayyadamaan hin argamne' });
+    }
+  }
+
   static async register(req: Request, res: Response): Promise<void> {
     try {
       const validatedData = registerSchema.parse(req.body);
@@ -40,10 +56,11 @@ export class AuthController {
       const validatedData = forgotPasswordSchema.parse(req.body);
 
       // Process reset logic in service layer
-      await AuthService.forgotPassword(validatedData);
+      const result = await AuthService.forgotPassword(validatedData);
 
       // ALWAYS return success to prevent email enumeration/harvesting attacks
       res.status(200).json({
+        ...result,
         message: 'Ergaaniiyyuu yoo jiraate, qajeelfama lakkoofsa eegumsaa haaressuuf deebisu ergineerra.',
       });
     } catch (error: any) {
@@ -65,25 +82,36 @@ export class AuthController {
 
   static async resetPassword(req: Request, res: Response): Promise<void> {
     try {
-      const { token, password } = req.body;
-
+      const validatedData = resetPasswordSchema.parse(req.body);
+      const result = await AuthService.resetPassword(validatedData);
+      res.status(200).json(result);
     } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: error.errors[0]?.message || 'Galmeen sirrii miti' });
+        return;
+      }
       console.error('Reset password error:', error);
-      res.status(400).json({ error: error.message || 'Dogoggora serverii' });
+      res.status(error.message === 'RESET_TOKEN_INVALID' ? 400 : 500).json({ error: error.message === 'RESET_TOKEN_INVALID' ? 'Mallattoon haaromsaa sirrii miti ykn yeroon isaa darbe.' : 'Dogoggora serverii' });
     }
   }
 
   static async changePassword(req: Request, res: Response): Promise<void> {
     try {
-      const { oldPassword, newPassword } = req.body;
-
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Hin seenin' });
+        return;
+      }
+      const validatedData = changePasswordSchema.parse(req.body);
+      const result = await AuthService.changePassword(userId, validatedData);
+      res.status(200).json(result);
     } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ error: error.errors[0]?.message || 'Dogoggora galmee' });
+        return;
+      }
       console.error('Change password error:', error);
       res.status(400).json({ error: error.message || 'Dogoggora serverii' });
     }
   }
-
- 
-
-
 }

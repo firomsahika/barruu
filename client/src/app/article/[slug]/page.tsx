@@ -279,21 +279,10 @@ export default function ArticleDetailPage() {
                   </div>
                 </div>
                 {user?.id === article.author.id && (
-                  <Link
-                    href={`/write?id=${article.id}`}
-                    style={{
-                      marginLeft: 'auto',
-                      padding: '6px 14px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '6px',
-                      textDecoration: 'none',
-                      fontSize: '13px',
-                      color: '#4b5563',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Gulaali
-                  </Link>
+                  <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                    <Link href={`/write?id=${article.id}`} style={{ padding: '6px 14px', border: '1px solid #e5e7eb', borderRadius: '6px', textDecoration: 'none', fontSize: '13px', color: '#4b5563', fontWeight: 500 }}>Gulaali</Link>
+                    <button onClick={async () => { if (!window.confirm('Barruu kana haquu barbaaddaa?')) return; try { await api.delete(`/articles/${article.id}`); toast.success('Barruun haqame.'); router.push('/'); } catch { toast.error('Barruu haquu hin dandeenye.'); } }} style={{ padding: '6px 14px', border: '1px solid #fecaca', borderRadius: '6px', background: '#fff', color: '#dc2626', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}>Haqi</button>
+                  </div>
                 )}
               </div>
 
@@ -464,7 +453,12 @@ export default function ArticleDetailPage() {
               </div>
             ) : (
               comments.map((comment) => (
-                <CommentItem key={comment.id} comment={comment} />
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  onDelete={(id) => setComments((previous) => previous.filter((item) => item.id !== id))}
+                  onUpdate={(updated) => setComments((previous) => previous.map((item) => item.id === updated.id ? updated : item))}
+                />
               ))
             )}
           </div>
