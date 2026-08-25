@@ -7,7 +7,12 @@ const router = Router();
 // DELETE /api/comments/:id - Delete comment
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    if (!id) {
+      res.status(400).json({ error: 'Comment ID is required' });
+      return;
+    }
 
     const comment = await prisma.comment.findUnique({ where: { id } });
     if (!comment) {
@@ -31,7 +36,12 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response): Pro
 // PATCH /api/comments/:id - Update comment
 router.patch('/:id', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    if (!id) {
+      res.status(400).json({ error: 'Comment ID is required' });
+      return;
+    }
     const { content } = req.body;
 
     const comment = await prisma.comment.findUnique({ where: { id } });

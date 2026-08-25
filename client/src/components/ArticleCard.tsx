@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Heart, MessageCircle, Bookmark, Zap } from 'lucide-react';
-import { Article, getAvatarUrl, formatRelativeDate, CATEGORY_LABELS, CATEGORY_COLORS } from '@/types';
+import { Article, Comment, getAvatarUrl, formatRelativeDate, CATEGORY_LABELS, CATEGORY_COLORS } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import api, { getApiErrorMessage } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -13,6 +13,36 @@ import toast from 'react-hot-toast';
 interface ArticleCardProps {
   article: Article;
   featured?: boolean;
+}
+
+function CommentPreview({ comments, slug }: { comments: Comment[]; slug: string }) {
+  return (
+    <div style={{ marginBottom: '12px', padding: '10px 12px', backgroundColor: '#f8fafc', border: '1px solid #eef0f3', borderRadius: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {comments.slice(0, 2).map((comment) => (
+          <div key={comment.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <img
+              src={getAvatarUrl(comment.author)}
+              alt={comment.author.name}
+              style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+            />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '2px' }}>
+                <strong style={{ color: '#171717', fontSize: '12px', fontWeight: 700 }}>{comment.author.name}</strong>
+                <span style={{ color: '#9ca3af', fontSize: '11px' }}>{formatRelativeDate(comment.createdAt)}</span>
+              </div>
+              <p style={{ margin: 0, color: '#4b5563', fontSize: '12px', lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {comment.content}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Link href={`/article/${slug}#yaadawwan`} style={{ display: 'inline-block', marginTop: '10px', color: '#3b49df', fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>
+        Yaada hunda ilaali
+      </Link>
+    </div>
+  );
 }
 
 export default function ArticleCard({ article, featured = false }: ArticleCardProps) {
@@ -155,21 +185,12 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
             </h2>
           </Link>
 
-          <p style={{ color: '#4b5563', fontSize: '12px', lineHeight: 1.35, margin: '0 0 12px', display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <p style={{ color: '#4b5563', fontSize: '14px', lineHeight: 1.55, margin: '0 0 14px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {preview}
           </p>
 
           {article.comments && article.comments.length > 0 && (
-            <div style={{ marginBottom: '12px', padding: '10px 12px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
-              {article.comments.map((comment) => (
-                <p key={comment.id} style={{ margin: '0 0 6px', color: '#4b5563', fontSize: '13px', lineHeight: 1.4 }}>
-                  <strong>{comment.author.name}:</strong> {comment.content}
-                </p>
-              ))}
-              <Link href={`/article/${article.slug}#yaadawwan`} style={{ color: '#3b49df', fontSize: '12px', textDecoration: 'none' }}>
-                Yaada hunda ilaali
-              </Link>
-            </div>
+            <CommentPreview comments={article.comments} slug={article.slug} />
           )}
 
           {/* Tags */}
@@ -365,21 +386,12 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
           </h2>
         </Link>
 
-        <p style={{ color: '#4b5563', fontSize: '15px', lineHeight: 1.55, margin: '0 0 10px', display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <p style={{ color: '#4b5563', fontSize: '14px', lineHeight: 1.55, margin: '0 0 14px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {preview}
         </p>
 
         {article.comments && article.comments.length > 0 && (
-          <div style={{ marginBottom: '10px', padding: '10px 12px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
-            {article.comments.map((comment) => (
-              <p key={comment.id} style={{ margin: '0 0 6px', color: '#4b5563', fontSize: '13px', lineHeight: 1.4 }}>
-                <strong>{comment.author.name}:</strong> {comment.content}
-              </p>
-            ))}
-            <Link href={`/article/${article.slug}#yaadawwan`} style={{ color: '#3b49df', fontSize: '12px', textDecoration: 'none' }}>
-              Yaada hunda ilaali
-            </Link>
-          </div>
+          <CommentPreview comments={article.comments} slug={article.slug} />
         )}
 
         {/* Tags */}

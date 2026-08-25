@@ -20,11 +20,11 @@ const api = axios.create({
 });
 
 // Attach JWT token to every request
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('sb_token');
+    const token =                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              localStorage.getItem('sb_token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
     }
   }
   return config;

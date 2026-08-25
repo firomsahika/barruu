@@ -22,7 +22,12 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 // GET /api/tags/:slug - Get tag with articles
 router.get('/:slug', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { slug } = req.params;
+    const rawSlug = req.params.slug;
+    const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+    if (!slug) {
+      res.status(400).json({ error: 'Tag slug is required' });
+      return;
+    }
     const tag = await prisma.tag.findUnique({
       where: { slug },
       include: {

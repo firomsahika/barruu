@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
 import Providers from "./providers";
+
+const archivo = localFont({
+  src: "./fonts/Archivo-Variable.ttf",
+  weight: "100 900",
+  style: "normal",
+  variable: "--font-archivo",
+});
 
 export const metadata: Metadata = {
   title: "Barruu - Afaan Oromo Literary Platform",
@@ -22,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="om">
-      <body className="min-h-screen antialiased">
+      <body className={`${archivo.variable} min-h-screen antialiased`}>
         <Providers>
           <Toaster
             position="top-right"

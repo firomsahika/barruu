@@ -8,10 +8,11 @@ export interface BookmarkRecord {
   article: Article;
 }
 
-export function useBookmarks() {
+export function useBookmarks(enabled = true) {
   return useQuery<BookmarkRecord[]>({
     queryKey: ['bookmarks'],
     queryFn: async () => (await api.get('/users/bookmarks')).data,
+    enabled,
   });
 }
 

@@ -566,21 +566,21 @@ function CommentItem({ comment }: { comment: Comment }) {
   const [showReplies, setShowReplies] = useState(true);
 
   return (
-    <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+    <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
       <Link href={`/user/${comment.author.username}`} style={{ flexShrink: 0 }}>
         <img
           src={getAvatarUrl(comment.author)}
           alt={comment.author.name}
-          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+          style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
         />
       </Link>
       <div style={{ flex: 1 }}>
         <div
           style={{
-            backgroundColor: '#f9fafb',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            padding: '12px 14px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #eef0f3',
+            borderRadius: '10px',
+            padding: '10px 12px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
@@ -590,18 +590,18 @@ function CommentItem({ comment }: { comment: Comment }) {
             >
               {comment.author.name}
             </Link>
-            <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+            <span style={{ fontSize: '11px', color: '#9ca3af' }}>
               {formatRelativeDate(comment.createdAt)}
             </span>
           </div>
-          <p style={{ fontSize: '14px', color: '#3d3d3d', lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: '13px', color: '#374151', lineHeight: 1.55, margin: 0, whiteSpace: 'pre-wrap' }}>
             {comment.content}
           </p>
         </div>
 
         {/* Replies */}
         {comment.replies && comment.replies.length > 0 && (
-          <div style={{ marginTop: '8px', marginLeft: '16px' }}>
+          <div style={{ marginTop: '8px', marginLeft: '14px', paddingLeft: '12px', borderLeft: '2px solid #eef0f3' }}>
             <button
               onClick={() => setShowReplies((p) => !p)}
               style={{

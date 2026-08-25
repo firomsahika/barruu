@@ -121,7 +121,7 @@ export default function Header() {
           </Link>
           <Link
             href="/register"
-            className="px-3.5 py-1.5 bg-[#3b49df] hover:bg-blue-700 text-white rounded-md text-xs font-bold whitespace-nowrap transition-colors"
+            className="px-3.5 py-1.5 bg-green-600 hover:bg-blue-700 text-white rounded-md text-xs font-bold whitespace-nowrap transition-colors"
           >
             Signup
           </Link>

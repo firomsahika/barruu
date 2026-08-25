@@ -51,6 +51,7 @@ export class UserService {
           where: { published: true },
           orderBy: { createdAt: 'desc' },
           include: {
+            author: { select: { id: true, name: true, username: true, avatarUrl: true } },
             tags: { include: { tag: true } },
             _count: { select: { reactions: true, comments: true } }
           }
@@ -58,10 +59,13 @@ export class UserService {
       }
     });
 
+    if (!user) {
+      throw new Error('Fayyadamaan hin argamne');
+    }
 
     // Calculate total reactions for user's articles
     const totalReactions = await prisma.reaction.count({
-      where: { article: { authorId: user?.id } }
+      where: { article: { authorId: user.id } }
     });
 
     return { ...user, totalReactions };

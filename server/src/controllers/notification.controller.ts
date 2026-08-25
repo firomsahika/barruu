@@ -16,7 +16,12 @@ export class NotificationController {
   static async markAsRead(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user?.id;
-      const { id } = req.params;
+      const rawId = req.params.id;
+      const id = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!id) {
+        res.status(400).json({ error: 'Notification ID is required' });
+        return;
+      }
       const notification = await NotificationService.markAsRead(id, userId);
       res.json(notification);
     } catch (error: any) {

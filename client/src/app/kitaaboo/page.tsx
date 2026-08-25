@@ -8,7 +8,7 @@ import { useBookmarks } from '@/hooks/useUserActions';
 
 export default function BookmarksPage() {
   const { user, isInitialized } = useAuthStore();
-  const { data: bookmarks = [], isLoading, isError } = useBookmarks();
+  const { data: bookmarks = [], isLoading, isError } = useBookmarks(isInitialized && !!user);
 
   if (!isInitialized || !user) {
     return <><Header /><p className="mx-auto max-w-3xl px-4 py-16 text-center text-gray-600">Kitaaboo kee ilaaluuf seeni.</p></>;
