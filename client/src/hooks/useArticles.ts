@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Article, ArticlesResponse } from '@/types';
+import { useAuthStore } from '@/store/authStore';
 
 export function useArticles(params: {
   page?: number;
@@ -10,12 +11,15 @@ export function useArticles(params: {
   sort?: 'relevant' | 'latest' | 'top';
   search?: string;
 }) {
+  const userId = useAuthStore((state) => state.user?.id);
+
   return useQuery({
-    queryKey: ['articles', params],
+    queryKey: ['articles', params, userId],
     queryFn: async () => {
       const { data } = await api.get<ArticlesResponse>('/articles', { params });
       return data;
     },
+    refetchInterval: 10000,
   });
 }
 

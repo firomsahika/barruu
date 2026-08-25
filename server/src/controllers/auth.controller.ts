@@ -45,7 +45,11 @@ export class AuthController {
         return;
       }
       console.error('Login error:', error);
-      res.status(401).json({ error: error.message || 'Dogoggora serverii' });
+      if (error.message === 'Email ykn jecha darbii hin sirre' || error.message === 'Email ykn jecha darbii sirrii miti!') {
+        res.status(401).json({ error: 'Email ykn jecha darbii sirrii miti.' });
+        return;
+      }
+      res.status(500).json({ error: 'Dogoggora serverii' });
     }
   }
 

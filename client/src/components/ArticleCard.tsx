@@ -2,24 +2,28 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Heart, MessageCircle, Bookmark, Zap } from 'lucide-react';
 import { Article, getAvatarUrl, formatRelativeDate, CATEGORY_LABELS, CATEGORY_COLORS } from '@/types';
 import { useAuthStore } from '@/store/authStore';
-import api from '@/lib/api';
+import api, { getApiErrorMessage } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface ArticleCardProps {
   article: Article;
   featured?: boolean;
-  onUpdate?: (article: Article) => void;
 }
 
-export default function ArticleCard({ article, featured = false, onUpdate }: ArticleCardProps) {
+export default function ArticleCard({ article, featured = false }: ArticleCardProps) {
   const { user } = useAuthStore();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [liked, setLiked] = useState(article.userReactions?.liked || false);
   const [unicorned, setUnicorned] = useState(article.userReactions?.unicorned || false);
   const [bookmarked, setBookmarked] = useState(article.userBookmarked || false);
-  const [likeCount, setLikeCount] = useState(article._count.reactions || 0);
+  const [likeCount, setLikeCount] = useState(article.reactionCounts?.likes ?? article._count.reactions ?? 0);
+  const [unicornCount, setUnicornCount] = useState(article.reactionCounts?.unicorns ?? 0);
   const [isReacting, setIsReacting] = useState(false);
 
   const handleReact = async (type: 'LIKE' | 'UNICORN') => {
@@ -30,17 +34,18 @@ export default function ArticleCard({ article, featured = false, onUpdate }: Art
     if (isReacting) return;
     setIsReacting(true);
     try {
-      await api.post(`/articles/${article.id}/react`, { type });
+      const { data } = await api.post(`/articles/${article.id}/react`, { type });
       if (type === 'LIKE') {
-        setLiked((prev) => {
-          setLikeCount((c) => prev ? c - 1 : c + 1);
-          return !prev;
-        });
+        setLiked(data.reacted);
+        setLikeCount((count) => data.reacted ? count + 1 : Math.max(0, count - 1));
       } else {
-        setUnicorned((prev) => !prev);
+        setUnicorned(data.reacted);
+        setUnicornCount((count) => data.reacted ? count + 1 : Math.max(0, count - 1));
       }
-    } catch {
-      toast.error('Dogoggori uumame');
+      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+      router.refresh();
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Dogoggori uumame'));
     } finally {
       setIsReacting(false);
     }
@@ -55,12 +60,18 @@ export default function ArticleCard({ article, featured = false, onUpdate }: Art
       await api.post(`/articles/${article.id}/bookmark`);
       setBookmarked((prev) => !prev);
       toast.success(bookmarked ? 'Kitaaboo keessaa haqame' : 'Kitaaboo keessatti kuufame');
-    } catch {
-      toast.error('Dogoggori uumame');
+      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+      router.refresh();
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Dogoggori uumame'));
     }
   };
 
   const tags = article.tags?.map((at) => at.tag) || [];
+  const preview = (article.excerpt || article.content)
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
   if (featured) {
     return (
@@ -144,6 +155,23 @@ export default function ArticleCard({ article, featured = false, onUpdate }: Art
             </h2>
           </Link>
 
+          <p style={{ color: '#4b5563', fontSize: '12px', lineHeight: 1.35, margin: '0 0 12px', display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {preview}
+          </p>
+
+          {article.comments && article.comments.length > 0 && (
+            <div style={{ marginBottom: '12px', padding: '10px 12px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+              {article.comments.map((comment) => (
+                <p key={comment.id} style={{ margin: '0 0 6px', color: '#4b5563', fontSize: '13px', lineHeight: 1.4 }}>
+                  <strong>{comment.author.name}:</strong> {comment.content}
+                </p>
+              ))}
+              <Link href={`/article/${article.slug}#yaadawwan`} style={{ color: '#3b49df', fontSize: '12px', textDecoration: 'none' }}>
+                Yaada hunda ilaali
+              </Link>
+            </div>
+          )}
+
           {/* Tags */}
           {tags.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
@@ -211,7 +239,7 @@ export default function ArticleCard({ article, featured = false, onUpdate }: Art
                 className="hover:bg-green-50"
               >
                 <Zap size={16} fill={unicorned ? '#16a34a' : 'none'} color={unicorned ? '#16a34a' : '#6b7280'} />
-                <span style={{ fontWeight: 500 }}>{article._count.reactions}</span>
+                <span style={{ fontWeight: 500 }}>{unicornCount}</span>
               </button>
               <Link
                 href={`/article/${article.slug}#yaadawwan`}
@@ -336,6 +364,23 @@ export default function ArticleCard({ article, featured = false, onUpdate }: Art
             {article.title}
           </h2>
         </Link>
+
+        <p style={{ color: '#4b5563', fontSize: '15px', lineHeight: 1.55, margin: '0 0 10px', display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {preview}
+        </p>
+
+        {article.comments && article.comments.length > 0 && (
+          <div style={{ marginBottom: '10px', padding: '10px 12px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+            {article.comments.map((comment) => (
+              <p key={comment.id} style={{ margin: '0 0 6px', color: '#4b5563', fontSize: '13px', lineHeight: 1.4 }}>
+                <strong>{comment.author.name}:</strong> {comment.content}
+              </p>
+            ))}
+            <Link href={`/article/${article.slug}#yaadawwan`} style={{ color: '#3b49df', fontSize: '12px', textDecoration: 'none' }}>
+              Yaada hunda ilaali
+            </Link>
+          </div>
+        )}
 
         {/* Tags */}
         {tags.length > 0 && (

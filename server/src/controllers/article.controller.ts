@@ -29,6 +29,23 @@ export class ArticleController {
     }
   }
 
+  static async getArticleById(req: Request, res: Response): Promise<void> {
+    try {
+      const rawId = req.params.id;
+      const id = Array.isArray(rawId) ? rawId[0] : rawId;
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Seena - mirkaneessa barbaachisa' });
+        return;
+      }
+      const result = await ArticleService.getArticleById(id, userId);
+      res.json(result);
+    } catch (error: any) {
+      console.error('Get article by ID error:', error);
+      res.status(404).json({ error: 'Barruun hin argamne' });
+    }
+  }
+
   static async createArticle(req: Request, res: Response): Promise<void> {
     try {
       const validatedData = createArticleSchema.parse(req.body);

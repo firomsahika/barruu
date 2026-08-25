@@ -12,6 +12,9 @@ const calculateReadingTime = ArticleService.calculateReadingTime;
 // GET /api/articles - Get all articles with pagination & filtering
 router.get('/', optionalAuth, ArticleController.getArticles);
 
+// GET /api/articles/id/:id - Get an article for its owner to edit
+router.get('/id/:id', authenticate, ArticleController.getArticleById);
+
 // GET /api/articles/:slug - Get single article
 router.get('/:slug', optionalAuth, ArticleController.getArticle);
 
@@ -23,7 +26,8 @@ router.post('/', authenticate, ArticleController.createArticle);
 // PATCH /api/articles/:id - Update article
 router.patch('/:id', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] ?? '' : rawId ?? '';
     const { title, content, excerpt, coverImageUrl, audioUrl, category, tags, published, featured } = req.body;
 
     const existing = await prisma.article.findUnique({ where: { id } });
@@ -32,7 +36,7 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response): Prom
       return;
     }
 
-    if (existing.authorId !== req.user!.id && req.user!.role !== 'ADMIN') {
+    if (existing.authorId !== req.user!.id) {
       res.status(403).json({ error: 'Hayyama hin qabdu' });
       return;
     }
@@ -86,7 +90,8 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response): Prom
 // DELETE /api/articles/:id
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] ?? '' : rawId ?? '';
 
     const existing = await prisma.article.findUnique({ where: { id } });
     if (!existing) {
@@ -94,7 +99,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response): Pro
       return;
     }
 
-    if (existing.authorId !== req.user!.id && req.user!.role !== 'ADMIN') {
+    if (existing.authorId !== req.user!.id) {
       res.status(403).json({ error: 'Hayyama hin qabdu' });
       return;
     }
@@ -110,7 +115,8 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response): Pro
 // POST /api/articles/:id/react - Toggle reaction
 router.post('/:id/react', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] ?? '' : rawId ?? '';
     const { type } = req.body; // 'LIKE' or 'UNICORN'
 
     if (!['LIKE', 'UNICORN'].includes(type)) {
@@ -156,7 +162,8 @@ router.post('/:id/react', authenticate, async (req: AuthRequest, res: Response):
 // POST /api/articles/:id/bookmark - Toggle bookmark
 router.post('/:id/bookmark', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] ?? '' : rawId ?? '';
 
     const article = await prisma.article.findUnique({ where: { id } });
     if (!article) {
@@ -186,7 +193,8 @@ router.post('/:id/bookmark', authenticate, async (req: AuthRequest, res: Respons
 // POST /api/articles/:id/comments - Add comment
 router.post('/:id/comments', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] ?? '' : rawId ?? '';
     const { content, parentId } = req.body;
 
     if (!content?.trim()) {

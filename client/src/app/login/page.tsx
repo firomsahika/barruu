@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import { getApiErrorMessage } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
@@ -21,7 +22,7 @@ export default function LoginPage() {
       toast.success('Simaate! Seentaniittu.');
       router.push('/');
     } catch (error: unknown) {
-      toast.error((error as Error).message || 'Seenuu hin danda\'amne');
+      toast.error(getApiErrorMessage(error, 'Seenuu hin danda\'amne'));
     }
   };
 

@@ -42,6 +42,12 @@ export default function UserProfilePage() {
       .finally(() => setIsLoading(false));
   }, [username]);
 
+  useEffect(() => {
+    if (profile) {
+      setIsFollowing(following.some((followed) => followed.id === profile.id));
+    }
+  }, [following, profile]);
+
   if (isLoading) {
     return (
       <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
@@ -66,10 +72,6 @@ export default function UserProfilePage() {
   }
 
   const isOwnProfile = currentUser?.username === username;
-
-  useEffect(() => {
-    setIsFollowing(following.some((followed) => followed.id === profile.id));
-  }, [following, profile.id]);
 
   const handleFollow = async () => {
     if (!currentUser) {

@@ -14,7 +14,8 @@ import {
   Eye, Save, Upload, Music
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
-import api from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
+import api, { getApiErrorMessage } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Category, CATEGORY_LABELS } from '@/types';
 
@@ -22,9 +23,13 @@ const CATEGORIES: Category[] = ['WALALOO', 'DURDURII', 'ASOOSAMA', 'OOLMAA', 'SA
 
 export default function WritePage() {
   const { user, isInitialized } = useAuthStore();
+  const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const editSlug = searchParams.get('slug');
   const editId = searchParams.get('id');
+  const isEditing = Boolean(editSlug || editId);
+  const [articleId, setArticleId] = useState(editId);
 
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -67,10 +72,12 @@ export default function WritePage() {
 
   // Load article for editing
   useEffect(() => {
-    if (editId && editor) {
-      api.get(`/articles/${editId}`)
+    if ((editSlug || editId) && editor && isInitialized && user) {
+      const request = editSlug ? api.get(`/articles/${editSlug}`) : api.get(`/articles/id/${editId}`);
+      request
         .then((res) => {
           const a = res.data;
+          setArticleId(a.id);
           setTitle(a.title);
           setCategory(a.category);
           setCoverImageUrl(a.coverImageUrl || '');
@@ -78,9 +85,12 @@ export default function WritePage() {
           setTags(a.tags?.map((at: { tag: { name: string } }) => at.tag.name) || []);
           editor.commands.setContent(a.content);
         })
-        .catch(() => toast.error('Barruu hin argamne'));
+        .catch((error: unknown) => {
+          toast.error(getApiErrorMessage(error, 'Barruu hin argamne'));
+          router.replace('/dashboard');
+        });
     }
-  }, [editId, editor]);
+  }, [editSlug, editId, editor, isInitialized, user, router]);
 
   const addTag = () => {
     const t = tagInput.trim().toLowerCase().replace(/^#/, '');
@@ -104,23 +114,35 @@ export default function WritePage() {
   const getContent = useCallback(() => editor?.getHTML() || '', [editor]);
 
   const handleSave = async (publish: boolean) => {
-    if (!title.trim()) { toast.error('Mata-duree galchaa'); return; }
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) { toast.error('Mata-duree galchaa'); return; }
     const content = getContent();
     if (!content || content === '<p></p>') { toast.error('Qabiyyee barreessaa'); return; }
 
     if (publish) setIsPublishing(true); else setIsSaving(true);
 
     try {
-      const payload = { title, content, category, tags, coverImageUrl: coverImageUrl || null, audioUrl: audioUrl || null, published: publish };
+      const payload = {
+        title: trimmedTitle,
+        content,
+        category,
+        tags,
+        ...(coverImageUrl.trim() ? { coverImageUrl: coverImageUrl.trim() } : {}),
+        ...(audioUrl.trim() ? { audioUrl: audioUrl.trim() } : {}),
+        published: publish,
+      };
 
-      if (editId) {
-        await api.patch(`/articles/${editId}`, payload);
+      if (articleId) {
+        await api.patch(`/articles/${articleId}`, payload);
         toast.success(publish ? 'Barruu maxxanfame!' : 'Draft kuufame!');
       } else {
         const res = await api.post('/articles', payload);
         toast.success(publish ? 'Barruu maxxanfame!' : 'Draft kuufame!');
         if (publish) router.push(`/article/${res.data.slug}`);
       }
+
+      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+      await queryClient.invalidateQueries({ queryKey: ['drafts'] });
 
       if (!publish) toast.success('Draft kuufame');
     } catch (error: unknown) {
@@ -197,7 +219,7 @@ export default function WritePage() {
         </Link>
 
         <span style={{ fontSize: '15px', color: '#4b5563', fontWeight: 500 }}>
-          {editId ? 'Gulaali' : 'Barruukee Barreessi'}
+          {isEditing ? 'Gulaali' : 'Barruukee Barreessi'}
         </span>
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Zap, Bookmark, MessageCircle, Share2, ArrowLeft, Volume2 } from 'lucide-react';
 import Header from '@/components/Header';
-import api from '@/lib/api';
+import api, { getApiErrorMessage } from '@/lib/api';
 import { Article, Comment, getAvatarUrl, formatDate, formatRelativeDate, CATEGORY_LABELS, CATEGORY_COLORS } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
@@ -21,6 +21,7 @@ export default function ArticleDetailPage() {
   const [unicorned, setUnicorned] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [unicornCount, setUnicornCount] = useState(0);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -34,7 +35,8 @@ export default function ArticleDetailPage() {
         setLiked(data.userReactions?.liked || false);
         setUnicorned(data.userReactions?.unicorned || false);
         setBookmarked(data.userReactions ? (data as Article & { userBookmarked: boolean }).userBookmarked : false);
-        setLikeCount(data.reactionCounts?.likes || data._count.reactions || 0);
+        setLikeCount(data.reactionCounts?.likes ?? data._count.reactions ?? 0);
+        setUnicornCount(data.reactionCounts?.unicorns ?? 0);
         setComments(data.comments || []);
       } catch {
         toast.error('Barruu hin argamne');
@@ -44,18 +46,21 @@ export default function ArticleDetailPage() {
       }
     };
     if (slug) fetchArticle();
-  }, [slug, router]);
+  }, [slug, router, user?.id]);
 
   const handleReact = async (type: 'LIKE' | 'UNICORN') => {
     if (!user) { toast.error('Simsiruuf seeni'); return; }
     try {
-      await api.post(`/articles/${article!.id}/react`, { type });
+      const { data } = await api.post(`/articles/${article!.id}/react`, { type });
       if (type === 'LIKE') {
-        setLiked((p) => { setLikeCount((c) => p ? c - 1 : c + 1); return !p; });
+        setLiked(data.reacted);
+        setLikeCount((count) => data.reacted ? count + 1 : Math.max(0, count - 1));
       } else {
-        setUnicorned((p) => !p);
+        setUnicorned(data.reacted);
+        setUnicornCount((count) => data.reacted ? count + 1 : Math.max(0, count - 1));
       }
-    } catch { toast.error('Dogoggori uumame'); }
+      router.refresh();
+    } catch (error: unknown) { toast.error(getApiErrorMessage(error, 'Dogoggori uumame')); }
   };
 
   const handleBookmark = async () => {
@@ -64,7 +69,8 @@ export default function ArticleDetailPage() {
       await api.post(`/articles/${article!.id}/bookmark`);
       setBookmarked((p) => !p);
       toast.success(bookmarked ? 'Kitaaboo keessaa haqame' : 'Kitaaboo keessatti kuufame');
-    } catch { toast.error('Dogoggori uumame'); }
+      router.refresh();
+    } catch (error: unknown) { toast.error(getApiErrorMessage(error, 'Dogoggori uumame')); }
   };
 
   const handleShare = async () => {
@@ -84,7 +90,8 @@ export default function ArticleDetailPage() {
       setComments((prev) => [res.data, ...prev]);
       setCommentText('');
       toast.success('Yaadni kee dabalame!');
-    } catch { toast.error('Yaadi hin dabalamine'); }
+      router.refresh();
+    } catch (error: unknown) { toast.error(getApiErrorMessage(error, 'Yaadi hin dabalamine')); }
     finally { setIsSubmittingComment(false); }
   };
 
@@ -183,7 +190,7 @@ export default function ArticleDetailPage() {
             >
               <Zap size={20} fill={unicorned ? '#16a34a' : 'none'} color={unicorned ? '#16a34a' : '#6b7280'} />
             </button>
-            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>{article._count.reactions}</span>
+            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>{unicornCount}</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
@@ -280,7 +287,7 @@ export default function ArticleDetailPage() {
                 </div>
                 {user?.id === article.author.id && (
                   <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                    <Link href={`/write?id=${article.id}`} style={{ padding: '6px 14px', border: '1px solid #e5e7eb', borderRadius: '6px', textDecoration: 'none', fontSize: '13px', color: '#4b5563', fontWeight: 500 }}>Gulaali</Link>
+                    <Link href={`/write?slug=${encodeURIComponent(article.slug)}`} style={{ padding: '6px 14px', border: '1px solid #e5e7eb', borderRadius: '6px', textDecoration: 'none', fontSize: '13px', color: '#4b5563', fontWeight: 500 }}>Gulaali</Link>
                     <button onClick={async () => { if (!window.confirm('Barruu kana haquu barbaaddaa?')) return; try { await api.delete(`/articles/${article.id}`); toast.success('Barruun haqame.'); router.push('/'); } catch { toast.error('Barruu haquu hin dandeenye.'); } }} style={{ padding: '6px 14px', border: '1px solid #fecaca', borderRadius: '6px', background: '#fff', color: '#dc2626', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}>Haqi</button>
                   </div>
                 )}

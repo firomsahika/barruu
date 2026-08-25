@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import LeftSidebar from '@/components/LeftSidebar';
 import RightSidebar from '@/components/RightSidebar';
@@ -8,6 +8,7 @@ import ArticleCard from '@/components/ArticleCard';
 import { useArticles } from '@/hooks/useArticles';
 import SearchInput from '@/components/Search';
 import { Compass, Zap, Users, LucideIcon } from 'lucide-react';
+import { Article } from '@/types';
 
 type SortTab = 'relevant' | 'latest' | 'top';
 
@@ -20,10 +21,21 @@ const TABS: { id: SortTab; label: string; icon: LucideIcon }[] = [
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<SortTab>('relevant');
   const [page, setPage] = useState(1);
+  const [displayedArticles, setDisplayedArticles] = useState<Article[]>([]);
 
   const { data, isLoading } = useArticles({ sort: activeTab, page, limit: 10 });
   const articles = data?.articles || [];
   const totalPages = data?.pagination.pages || 1;
+
+  useEffect(() => {
+    setDisplayedArticles((previous) => page === 1
+      ? articles
+      : [...previous, ...articles.filter((article) => !previous.some((item) => item.id === article.id))]);
+  }, [articles, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab]);
 
   const loadMore = () => {
     if (page < totalPages) setPage(page + 1);
@@ -131,7 +143,7 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              {articles.map((article, index) => (
+              {displayedArticles.map((article, index) => (
                 <ArticleCard
                   key={article.id}
                   article={article}

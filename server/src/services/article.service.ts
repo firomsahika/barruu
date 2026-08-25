@@ -48,7 +48,7 @@ export class ArticleService {
     if (sort === 'top') {
       orderBy = { reactions: { _count: 'desc' } };
     } else if (sort === 'relevant') {
-      orderBy = { viewCount: 'desc' };
+      orderBy = [{ createdAt: 'desc' }, { id: 'desc' }];
     }
 
     const [articles, total] = await Promise.all([
@@ -60,13 +60,28 @@ export class ArticleService {
         include: {
           author: { select: { id: true, name: true, username: true, avatarUrl: true } },
           tags: { include: { tag: true } },
+          comments: {
+            where: { parentId: null },
+            take: 2,
+            orderBy: { createdAt: 'desc' },
+            include: {
+              author: { select: { id: true, name: true, username: true, avatarUrl: true } },
+            },
+          },
+          reactions: { select: { type: true } },
           _count: { select: { reactions: true, comments: true, bookmarks: true } }
         }
       }),
       prisma.article.count({ where })
     ]);
 
-    let articlesWithStatus = articles;
+    let articlesWithStatus = articles.map(a => ({
+      ...a,
+      reactionCounts: {
+        likes: a.reactions.filter(r => r.type === 'LIKE').length,
+        unicorns: a.reactions.filter(r => r.type === 'UNICORN').length,
+      },
+    }));
 
     if (userId) {
       const reactionData = await prisma.reaction.findMany({
@@ -79,7 +94,7 @@ export class ArticleService {
       const reactionMap = new Map(reactionData.map(r => [`${r.articleId}-${r.type}`, true]));
       const bookmarkSet = new Set(bookmarkData.map(b => b.articleId));
 
-      articlesWithStatus = articles.map(a => ({
+      articlesWithStatus = articlesWithStatus.map(a => ({
         ...a,
         userReactions: {
           liked: reactionMap.has(`${a.id}-LIKE`),
@@ -155,6 +170,16 @@ export class ArticleService {
     }
 
     return { ...article, reactionCounts, userReactions, userBookmarked };
+  }
+
+  static async getArticleById(id: string, userId: string) {
+    const article = await prisma.article.findUnique({
+      where: { id },
+      select: { slug: true, authorId: true },
+    });
+
+    if (!article || article.authorId !== userId) throw new Error('ARTICLE_NOT_FOUND');
+    return this.getArticleBySlug(article.slug, userId);
   }
 
   static async createArticle(data: z.infer<typeof createArticleSchema>, userId: string) {
