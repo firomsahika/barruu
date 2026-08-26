@@ -148,6 +148,7 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
             <img
               src={getAvatarUrl(article.author)}
               alt={article.author.name}
+              className="bg-slate-800"
               style={{
                 width: '32px',
                 height: '32px',

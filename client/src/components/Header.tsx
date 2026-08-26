@@ -48,7 +48,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <Link
             href="/write"
-            className="hidden sm:block px-3 py-1.5 bg-[#3b49df] hover:bg-blue-700 text-white rounded-md text-xs font-semibold whitespace-nowrap transition-colors"
+            className="hidden sm:block px-3 py-1.5 bg-slate-800 hover:bg-slate-600 text-white rounded-md text-xs font-semibold whitespace-nowrap transition-colors"
           >
             Barreessi
           </Link>
@@ -61,12 +61,12 @@ export default function Header() {
           <div ref={userMenuRef} className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-9 h-9 rounded-full overflow-hidden border border-gray-200 hover:border-gray-400 transition-colors"
+              className="w-9 h-9 rounded-full overflow-hidden border bg-slate-800 border-gray-200 hover:border-gray-400 transition-colors"
             >
               <img
                 src={getAvatarUrl(user)}
                 alt={user.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full bg-slate-800 object-cover"
               />
             </button>
 
@@ -121,7 +121,7 @@ export default function Header() {
           </Link>
           <Link
             href="/register"
-            className="px-3.5 py-1.5 bg-green-600 hover:bg-blue-700 text-white rounded-md text-xs font-bold whitespace-nowrap transition-colors"
+            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-xs font-bold whitespace-nowrap transition-colors"
           >
             Signup
           </Link>

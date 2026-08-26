@@ -49,7 +49,7 @@ export default function RightSidebar() {
       </div>
 
       {/* Studio spot card */}
-      <div className="mb-4 rounded-lg bg-[#172554] p-5 text-white shadow-sm">
+      <div className="mb-4 rounded-lg bg-slate-800 p-5 text-white shadow-sm">
         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-blue-200">
           BARREESSAA TA&apos;I
         </div>

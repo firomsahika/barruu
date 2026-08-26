@@ -56,7 +56,7 @@ export default function LoginPage() {
           marginBottom: '24px',
         }}
       >
-        S|B
+        B
       </Link>
 
       <h1
@@ -68,10 +68,10 @@ export default function LoginPage() {
           textAlign: 'center',
         }}
       >
-        Siidaa Barruu Seeni
+        Barruu Seeni
       </h1>
       <p style={{ color: '#6b7280', fontSize: '15px', marginBottom: '32px', textAlign: 'center' }}>
-        Akaawuntii kee fayyadamee seeni
+        Akaawuntii kee fayyadamii seeni
       </p>
 
       <div
@@ -171,10 +171,11 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
+            className="bg-slate-800 "
             style={{
               width: '100%',
               padding: '12px',
-              backgroundColor: isLoading ? '#6b7280' : '#3b49df',
+              
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -185,7 +186,7 @@ export default function LoginPage() {
               transition: 'background 0.15s',
             }}
           >
-            {isLoading ? 'Seenaa...' : 'Seeni'}
+            {isLoading ? 'Seenaa jira...' : 'Seeni'}
           </button>
           <Link href="/forgot-password" style={{ display: 'block', marginTop: '12px', textAlign: 'center', color: '#3b49df', fontSize: '13px', textDecoration: 'none' }}>
             Jecha darbii dagattee?

@@ -282,7 +282,7 @@ export default function ArticleDetailPage() {
                     {article.author.name}
                   </Link>
                   <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                    {formatDate(article.createdAt)} · dubbiisa daqiiqaa {article.readingTime}
+                    {formatDate(article.createdAt)} · dubbisa daqiiqaa {article.readingTime}
                   </div>
                 </div>
                 {user?.id === article.author.id && (
@@ -408,12 +408,12 @@ export default function ArticleDetailPage() {
                     onBlur={(e) => (e.target.style.borderColor = '#e5e7eb')}
                   />
                   <button
+                    className="bg-slate-800"
                     type="submit"
                     disabled={isSubmittingComment || !commentText.trim()}
                     style={{
                       marginTop: '8px',
                       padding: '8px 16px',
-                      backgroundColor: '#3b49df',
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '6px',
@@ -424,7 +424,7 @@ export default function ArticleDetailPage() {
                       fontFamily: 'inherit',
                     }}
                   >
-                    {isSubmittingComment ? 'Dabalaa...' : 'Yaada Dabaali'}
+                    {isSubmittingComment ? 'Dabalaa jira...' : 'Yaada Dabaali'}
                   </button>
                 </div>
               </form>
@@ -483,7 +483,9 @@ export default function ArticleDetailPage() {
               marginBottom: '16px',
             }}
           >
-            <div style={{ height: '60px', background: 'linear-gradient(135deg, #3b49df, #7c3aed)' }} />
+            <div style={{ height: '60px' }}
+             className="bg-slate-800"
+            />
             <div style={{ padding: '0 16px 16px', marginTop: '-28px' }}>
               <Link href={`/user/${article.author.username}`}>
                 <img
@@ -518,13 +520,13 @@ export default function ArticleDetailPage() {
                   display: 'block',
                   textAlign: 'center',
                   padding: '8px',
-                  backgroundColor: '#3b49df',
                   color: '#ffffff',
                   borderRadius: '6px',
                   textDecoration: 'none',
                   fontSize: '14px',
                   fontWeight: 600,
                 }}
+                className="bg-slate-800"
               >
                 Fuula Ilaalaa
               </Link>

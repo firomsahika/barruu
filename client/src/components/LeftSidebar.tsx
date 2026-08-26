@@ -61,7 +61,7 @@ export default function LeftSidebar() {
         <div className="space-y-2 pt-1">
           <Link
             href="/register"
-            className="block text-center w-full py-2 px-3 text-[13px] font-semibold text-white bg-[#3b49df] hover:bg-blue-700 rounded-md transition-colors"
+            className="block text-center w-full py-2 px-3 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-600 rounded-md transition-colors"
           >
             Galmaa'i Amma
           </Link>
