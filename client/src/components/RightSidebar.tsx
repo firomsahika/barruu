@@ -73,6 +73,9 @@ export default function RightSidebar() {
           Akaakuuwwan Barruutii
         </div>
         {[
+          { label: '📰 Oduu', href: '/oduu', desc: 'Oduu waa’ee barruu fi aadaa' },
+          { label: '💬 Mammaaksa', href: '/mammaaksa', desc: 'Mammaaksa fi jechamoota' },
+          { label: '🏛️ Seenaa', href: '/seenaa', desc: 'Seenaa Oromoo' },
           { label: '📜 Walaloo', href: '/walaloo', desc: 'Gabatee walaloo' },
           { label: '🌿 Durdurii', href: '/durdurii', desc: 'Aadaa fi seenaa' },
           { label: '📖 Asoosama', href: '/asoosama', desc: 'Novelaa fi gabaabaa' },

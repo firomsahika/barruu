@@ -14,8 +14,8 @@ const archivo = localFont({
 
 export const metadata: Metadata = {
   title: "Barruu - Afaan Oromo Literary Platform",
-  description: "Barruu: Dhaabbata maxxansaa barruu fi aadaa Afaan Oromo. Walaloo, Durdurii, Asoosama, fi Sagalee.",
-  keywords: ["Afaan Oromo", "Literature", "Poetry", "Walaloo", "Durdurii", "Asoosama"],
+  description: "Barruu: Dhaabbata maxxansaa barruu fi aadaa Afaan Oromo. Oduu, Mammaaksa, Seenaa, Walaloo, Durdurii, Asoosama, fi Sagalee.",
+  keywords: ["Afaan Oromo", "Literature", "Oduu", "Mammaaksa", "Seenaa", "Poetry", "Walaloo", "Durdurii", "Asoosama"],
   openGraph: {
     title: "Barruu",
     description: "Afaan Oromo Literary & Creative Publishing Platform",

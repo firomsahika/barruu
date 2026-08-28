@@ -4,8 +4,21 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { Heart, MessageCircle, Bookmark, Zap } from 'lucide-react';
-import { Article, Comment, getAvatarUrl, formatRelativeDate, CATEGORY_LABELS, CATEGORY_COLORS } from '@/types';
+import {
+  Heart,
+  MessageCircle,
+  Bookmark,
+  Zap,
+  ArrowUpRight,
+} from 'lucide-react';
+import {
+  Article,
+  Comment,
+  getAvatarUrl,
+  formatRelativeDate,
+  CATEGORY_LABELS,
+  CATEGORY_COLORS,
+} from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import api, { getApiErrorMessage } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -15,202 +28,386 @@ interface ArticleCardProps {
   featured?: boolean;
 }
 
-function CommentPreview({ comments, slug }: { comments: Comment[]; slug: string }) {
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function getCategoryIcon(category: string) {
+  switch (category) {
+    case 'MAMMAAKSA':
+      return '💬';
+    case 'SEENAA':
+      return '🏛️';
+    case 'WALALOO':
+      return '📜';
+    case 'DURDURII':
+      return '🌿';
+    case 'ASOOSAMA':
+      return '📖';
+    case 'SAGALEE':
+      return '🎙️';
+    default:
+      return '🎓';
+  }
+}
+
+function CommentPreview({
+  comments,
+  slug,
+}: {
+  comments: Comment[];
+  slug: string;
+}) {
+  if (!comments?.length) return null;
+
   return (
-    <div style={{ marginBottom: '12px', padding: '10px 12px', backgroundColor: '#f8fafc', border: '1px solid #eef0f3', borderRadius: '8px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+      <div className="space-y-3">
         {comments.slice(0, 2).map((comment) => (
-          <div key={comment.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+          <div
+            key={comment.id}
+            className="flex items-start gap-2.5"
+          >
             <img
               src={getAvatarUrl(comment.author)}
               alt={comment.author.name}
-              style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+              className="h-7 w-7 shrink-0 rounded-full object-cover ring-2 ring-white"
             />
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '2px' }}>
-                <strong style={{ color: '#171717', fontSize: '12px', fontWeight: 700 }}>{comment.author.name}</strong>
-                <span style={{ color: '#9ca3af', fontSize: '11px' }}>{formatRelativeDate(comment.createdAt)}</span>
+
+            <div className="min-w-0 flex-1">
+              <div className="mb-0.5 flex items-center gap-1.5">
+                <span className="truncate text-xs font-semibold text-slate-900">
+                  {comment.author.name}
+                </span>
+
+                <span className="shrink-0 text-[10px] text-slate-400">
+                  {formatRelativeDate(comment.createdAt)}
+                </span>
               </div>
-              <p style={{ margin: 0, color: '#4b5563', fontSize: '12px', lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+
+              <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">
                 {comment.content}
               </p>
             </div>
           </div>
         ))}
       </div>
-      <Link href={`/article/${slug}#yaadawwan`} style={{ display: 'inline-block', marginTop: '10px', color: '#3b49df', fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>
+
+      <Link
+        href={`/article/${slug}#yaadawwan`}
+        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 transition-colors hover:text-slate-950"
+      >
         Yaada hunda ilaali
+        <ArrowUpRight className="h-3 w-3" />
       </Link>
     </div>
   );
 }
 
-export default function ArticleCard({ article, featured = false }: ArticleCardProps) {
+/* -------------------------------------------------------------------------- */
+/* Action Button                                                              */
+/* -------------------------------------------------------------------------- */
+
+function ActionButton({
+  active,
+  onClick,
+  icon,
+  label,
+  activeClassName,
+  hoverClassName,
+  disabled = false,
+}: {
+  active?: boolean;
+  onClick?: () => void;
+  icon: React.ReactNode;
+  label?: React.ReactNode;
+  activeClassName?: string;
+  hoverClassName?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={[
+        'group inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
+        'text-xs font-medium transition-all duration-200',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300',
+        'disabled:pointer-events-none disabled:opacity-50',
+        active
+          ? activeClassName
+          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800',
+        hoverClassName ?? '',
+      ].join(' ')}
+    >
+      {icon}
+      {label !== undefined && <span>{label}</span>}
+    </button>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Article Card                                                               */
+/* -------------------------------------------------------------------------- */
+
+export default function ArticleCard({
+  article,
+  featured = false,
+}: ArticleCardProps) {
   const { user } = useAuthStore();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [liked, setLiked] = useState(article.userReactions?.liked || false);
-  const [unicorned, setUnicorned] = useState(article.userReactions?.unicorned || false);
-  const [bookmarked, setBookmarked] = useState(article.userBookmarked || false);
-  const [likeCount, setLikeCount] = useState(article.reactionCounts?.likes ?? article._count.reactions ?? 0);
-  const [unicornCount, setUnicornCount] = useState(article.reactionCounts?.unicorns ?? 0);
-  const [isReacting, setIsReacting] = useState(false);
 
-  const handleReact = async (type: 'LIKE' | 'UNICORN') => {
+  const [liked, setLiked] = useState(
+    article.userReactions?.liked || false
+  );
+
+  const [unicorned, setUnicorned] = useState(
+    article.userReactions?.unicorned || false
+  );
+
+  const [bookmarked, setBookmarked] = useState(
+    article.userBookmarked || false
+  );
+
+  const [likeCount, setLikeCount] = useState(
+    article.reactionCounts?.likes ??
+    article._count.reactions ??
+    0
+  );
+
+  const [unicornCount, setUnicornCount] = useState(
+    article.reactionCounts?.unicorns ?? 0
+  );
+
+  const [isReacting, setIsReacting] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
+
+  const tags = article.tags?.map((at) => at.tag) || [];
+
+  const preview = (article.excerpt || article.content)
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const categoryColor =
+    CATEGORY_COLORS[article.category] || '#3b49df';
+
+  /* ------------------------------------------------------------------------ */
+  /* Reactions                                                                */
+  /* ------------------------------------------------------------------------ */
+
+  const handleReact = async (
+    type: 'LIKE' | 'UNICORN'
+  ) => {
     if (!user) {
       toast.error('Simsiruuf seeni');
       return;
     }
+
     if (isReacting) return;
+
     setIsReacting(true);
+
     try {
-      const { data } = await api.post(`/articles/${article.id}/react`, { type });
+      const { data } = await api.post(
+        `/articles/${article.id}/react`,
+        { type }
+      );
+
       if (type === 'LIKE') {
         setLiked(data.reacted);
-        setLikeCount((count) => data.reacted ? count + 1 : Math.max(0, count - 1));
+
+        setLikeCount((count) =>
+          data.reacted
+            ? count + 1
+            : Math.max(0, count - 1)
+        );
       } else {
         setUnicorned(data.reacted);
-        setUnicornCount((count) => data.reacted ? count + 1 : Math.max(0, count - 1));
+
+        setUnicornCount((count) =>
+          data.reacted
+            ? count + 1
+            : Math.max(0, count - 1)
+        );
       }
-      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['articles'],
+      });
+
       router.refresh();
     } catch (error: unknown) {
-      toast.error(getApiErrorMessage(error, 'Dogoggori uumame'));
+      toast.error(
+        getApiErrorMessage(
+          error,
+          'Dogoggori uumame'
+        )
+      );
     } finally {
       setIsReacting(false);
     }
   };
+
+  /* ------------------------------------------------------------------------ */
+  /* Bookmark                                                                 */
+  /* ------------------------------------------------------------------------ */
 
   const handleBookmark = async () => {
     if (!user) {
       toast.error('Kuusuuf seeni');
       return;
     }
+
+    if (isBookmarking) return;
+
+    setIsBookmarking(true);
+
     try {
-      await api.post(`/articles/${article.id}/bookmark`);
+      await api.post(
+        `/articles/${article.id}/bookmark`
+      );
+
       setBookmarked((prev) => !prev);
-      toast.success(bookmarked ? 'Kitaaboo keessaa haqame' : 'Kitaaboo keessatti kuufame');
-      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+
+      toast.success(
+        bookmarked
+          ? 'Kitaaboo keessaa haqame'
+          : 'Kitaaboo keessatti kuufame'
+      );
+
+      await queryClient.invalidateQueries({
+        queryKey: ['articles'],
+      });
+
       router.refresh();
     } catch (error: unknown) {
-      toast.error(getApiErrorMessage(error, 'Dogoggori uumame'));
+      toast.error(
+        getApiErrorMessage(
+          error,
+          'Dogoggori uumame'
+        )
+      );
+    } finally {
+      setIsBookmarking(false);
     }
   };
 
-  const tags = article.tags?.map((at) => at.tag) || [];
-  const preview = (article.excerpt || article.content)
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  /* ======================================================================== */
+  /* FEATURED CARD                                                            */
+  /* ======================================================================== */
 
   if (featured) {
     return (
-      <article
-        style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          marginBottom: '16px',
-        }}
-      >
-        {/* Cover image or gradient */}
-        {article.coverImageUrl ? (
-          <div style={{ height: '220px', overflow: 'hidden' }}>
-            <img
-              src={article.coverImageUrl}
-              alt={article.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
-        ) : (
-          <div
-            style={{
-              height: '220px',
-              background: `linear-gradient(135deg, ${CATEGORY_COLORS[article.category] || '#3b49df'} 0%, #1a1a2e 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <span style={{ fontSize: '64px' }}>
-              {article.category === 'WALALOO' ? '📜' :
-               article.category === 'DURDURII' ? '🌿' :
-               article.category === 'ASOOSAMA' ? '📖' :
-               article.category === 'SAGALEE' ? '🎙️' : '🎓'}
-            </span>
-          </div>
-        )}
+      <article className="group relative mb-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50">
+        {/* ------------------------------------------------------------------ */}
+        {/* Cover                                                              */}
+        {/* ------------------------------------------------------------------ */}
 
-        <div style={{ padding: '16px' }}>
+        <Link
+          href={`/article/${article.slug}`}
+          className="relative block overflow-hidden"
+        >
+          <div className="relative h-[260px] w-full overflow-hidden bg-slate-100 sm:h-[320px]">
+            {article.coverImageUrl ? (
+              <img
+                src={article.coverImageUrl}
+                alt={article.title}
+                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+              />
+            ) : (
+              <div
+                className="relative flex h-full w-full items-center justify-center overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${categoryColor} 0%, #111827 100%)`,
+                }}
+              >
+                <div className="absolute inset-0 bg-black/10" />
+
+                <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/20 bg-white/10 text-5xl shadow-2xl backdrop-blur-md">
+                  {getCategoryIcon(article.category)}
+                </div>
+              </div>
+            )}
+
+            {/* Image overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+
+            {/* Category */}
+            <div className="absolute left-5 top-5">
+              <span
+                className="inline-flex items-center rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white shadow-lg backdrop-blur-md"
+              >
+                {CATEGORY_LABELS[article.category]}
+              </span>
+            </div>
+
+            {/* Reading time */}
+            <div className="absolute bottom-5 right-5">
+              <span className="rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
+                {article.readingTime} min read
+              </span>
+            </div>
+          </div>
+        </Link>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Content                                                            */}
+        {/* ------------------------------------------------------------------ */}
+
+        <div className="p-5 sm:p-6">
           {/* Author */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-            <img
-              src={getAvatarUrl(article.author)}
-              alt={article.author.name}
-              className="bg-slate-800"
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-              }}
-            />
-            <div>
+          <div className="mb-4 flex items-center gap-3">
+            <Link
+              href={`/user/${article.author.username}`}
+              className="shrink-0"
+            >
+              <img
+                src={getAvatarUrl(article.author)}
+                alt={article.author.name}
+                className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-100 transition-all duration-200 group-hover:ring-slate-200"
+              />
+            </Link>
+
+            <div className="min-w-0">
               <Link
                 href={`/user/${article.author.username}`}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#08090a', textDecoration: 'none' }}
-                className="hover:text-blue-600"
+                className="block truncate text-sm font-semibold text-slate-900 transition-colors hover:text-slate-600"
               >
                 {article.author.name}
               </Link>
-              <div style={{ fontSize: '12px', color: '#6b7280' }}>
+
+              <div className="text-xs text-slate-400">
                 {formatRelativeDate(article.createdAt)}
               </div>
             </div>
           </div>
 
           {/* Title */}
-          <Link href={`/article/${article.slug}`} style={{ textDecoration: 'none' }}>
-            <h2
-              style={{
-                fontSize: '24px',
-                fontWeight: 800,
-                color: '#08090a',
-                lineHeight: 1.3,
-                margin: '0 0 8px',
-              }}
-              className="hover:text-blue-700"
-            >
+          <Link
+            href={`/article/${article.slug}`}
+            className="block"
+          >
+            <h2 className="max-w-3xl text-2xl font-extrabold leading-tight tracking-[-0.025em] text-slate-950 transition-colors duration-200 group-hover:text-slate-700 sm:text-[28px]">
               {article.title}
             </h2>
           </Link>
 
-          <p style={{ color: '#4b5563', fontSize: '14px', lineHeight: 1.55, margin: '0 0 14px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {/* Excerpt */}
+          <p className="mt-3 line-clamp-2 max-w-2xl text-[13.5px] leading-5 text-slate-500">
             {preview}
           </p>
 
-          {article.comments && article.comments.length > 0 && (
-            <CommentPreview comments={article.comments} slug={article.slug} />
-          )}
-
           {/* Tags */}
           {tags.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
-              {tags.map((tag) => (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {tags.slice(0, 5).map((tag) => (
                 <Link
                   key={tag.id}
                   href={`/tag/${tag.slug}`}
-                  style={{
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    backgroundColor: '#f3f4f6',
-                    color: '#4b5563',
-                    fontSize: '13px',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                  }}
-                  className="hover:bg-gray-200"
+                  className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500 transition-all duration-200 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800"
                 >
                   #{tag.name}
                 </Link>
@@ -218,151 +415,154 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
             </div>
           )}
 
+          {/* Comments */}
+          {article.comments &&
+            article.comments.length > 0 && (
+              <CommentPreview
+                comments={article.comments}
+                slug={article.slug}
+              />
+            )}
+
+          {/* Divider */}
+          <div className="my-5 h-px bg-slate-100" />
+
           {/* Footer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <button
-                onClick={() => handleReact('LIKE')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: liked ? '#fee2e2' : 'transparent',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: liked ? '#ef4444' : '#6b7280',
-                  fontFamily: 'inherit',
-                  transition: 'all 0.15s',
-                }}
-                className="hover:bg-red-50"
-              >
-                <Heart size={16} fill={liked ? '#ef4444' : 'none'} color={liked ? '#ef4444' : '#6b7280'} />
-                <span style={{ fontWeight: 500 }}>{likeCount}</span>
-              </button>
-              <button
-                onClick={() => handleReact('UNICORN')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: unicorned ? '#f0fdf4' : 'transparent',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: unicorned ? '#16a34a' : '#6b7280',
-                  fontFamily: 'inherit',
-                  transition: 'all 0.15s',
-                }}
-                className="hover:bg-green-50"
-              >
-                <Zap size={16} fill={unicorned ? '#16a34a' : 'none'} color={unicorned ? '#16a34a' : '#6b7280'} />
-                <span style={{ fontWeight: 500 }}>{unicornCount}</span>
-              </button>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-0.5">
+              {/* Like */}
+              <ActionButton
+                onClick={() =>
+                  handleReact('LIKE')
+                }
+                disabled={isReacting}
+                active={liked}
+                activeClassName="bg-red-50 text-red-500"
+                icon={
+                  <Heart
+                    className="h-4 w-4 transition-transform duration-200 group-hover:scale-105"
+                    fill={
+                      liked
+                        ? 'currentColor'
+                        : 'none'
+                    }
+                  />
+                }
+                label={likeCount}
+              />
+
+              {/* Unicorn */}
+              <ActionButton
+                onClick={() =>
+                  handleReact('UNICORN')
+                }
+                disabled={isReacting}
+                active={unicorned}
+                activeClassName="bg-emerald-50 text-emerald-600"
+                icon={
+                  <Zap
+                    className="h-4 w-4"
+                    fill={
+                      unicorned
+                        ? 'currentColor'
+                        : 'none'
+                    }
+                  />
+                }
+                label={unicornCount}
+              />
+
+              {/* Comments */}
               <Link
                 href={`/article/${article.slug}#yaadawwan`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  color: '#6b7280',
-                  transition: 'background 0.1s',
-                }}
-                className="hover:bg-gray-100"
+                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-800"
               >
-                <MessageCircle size={16} />
-                <span style={{ fontWeight: 500 }}>{article._count.comments} yaada</span>
+                <MessageCircle className="h-4 w-4" />
+                <span>
+                  {article._count.comments}
+                </span>
               </Link>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px', color: '#9ca3af' }}>
-                dubbiisa daqiiqaa {article.readingTime}
-              </span>
-              <button
-                onClick={handleBookmark}
-                style={{
-                  padding: '6px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: bookmarked ? '#eff6ff' : 'transparent',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  transition: 'all 0.15s',
-                }}
-                className="hover:bg-gray-100"
-              >
-                <Bookmark
-                  size={18}
-                  fill={bookmarked ? '#3b49df' : 'none'}
-                  color={bookmarked ? '#3b49df' : '#6b7280'}
-                />
-              </button>
-            </div>
+
+            {/* Bookmark */}
+            <button
+              type="button"
+              onClick={handleBookmark}
+              disabled={isBookmarking}
+              aria-label={
+                bookmarked
+                  ? 'Remove bookmark'
+                  : 'Bookmark article'
+              }
+              className={[
+                'rounded-lg p-2 transition-all duration-200',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300',
+                'disabled:pointer-events-none disabled:opacity-50',
+                bookmarked
+                  ? 'bg-slate-100 text-slate-900'
+                  : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700',
+              ].join(' ')}
+            >
+              <Bookmark
+                className="h-[18px] w-[18px]"
+                fill={
+                  bookmarked
+                    ? 'currentColor'
+                    : 'none'
+                }
+              />
+            </button>
           </div>
         </div>
       </article>
     );
   }
 
-  // Standard card
+  /* ======================================================================== */
+  /* STANDARD CARD                                                            */
+  /* ======================================================================== */
+
   return (
-    <article
-      style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        padding: '16px',
-        marginBottom: '10px',
-        transition: 'box-shadow 0.1s',
-      }}
-      className="hover:shadow-sm"
-    >
-      {/* Author */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-        <Link href={`/user/${article.author.username}`}>
+    <article className="group mb-3 rounded-2xl border border-slate-200/80 bg-white p-4 transition-all duration-300 hover:-translate-y-[1px] hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/40 sm:p-5">
+      {/* ------------------------------------------------------------------ */}
+      {/* Header                                                             */}
+      {/* ------------------------------------------------------------------ */}
+
+      <div className="flex items-center gap-3">
+        {/* Avatar */}
+        <Link
+          href={`/user/${article.author.username}`}
+          className="shrink-0"
+        >
           <img
             src={getAvatarUrl(article.author)}
             alt={article.author.name}
-            style={{
-              width: '30px',
-              height: '30px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-            }}
+            className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-50 transition-all duration-200 group-hover:ring-slate-100"
           />
         </Link>
-        <div>
+
+        {/* Author */}
+        <div className="min-w-0">
           <Link
             href={`/user/${article.author.username}`}
-            style={{ fontSize: '13px', fontWeight: 600, color: '#08090a', textDecoration: 'none' }}
-            className="hover:text-blue-600"
+            className="block max-w-[180px] truncate text-[13px] font-semibold text-slate-900 transition-colors hover:text-slate-600"
           >
             {article.author.name}
           </Link>
-          <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+
+          <span className="text-[11px] text-slate-400">
             {formatRelativeDate(article.createdAt)}
-          </div>
+          </span>
         </div>
 
-        {/* Category badge */}
-        <div style={{ marginLeft: 'auto' }}>
+        {/* Category */}
+        <div className="ml-auto">
           <span
+            className="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide"
             style={{
-              padding: '2px 8px',
-              borderRadius: '12px',
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#ffffff',
-              backgroundColor: CATEGORY_COLORS[article.category] || '#3b49df',
+              color: categoryColor,
+              borderColor: `${categoryColor}30`,
+              backgroundColor: `${categoryColor}0D`,
             }}
           >
             {CATEGORY_LABELS[article.category]}
@@ -370,122 +570,163 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
         </div>
       </div>
 
-      {/* Title */}
-      <div style={{ paddingLeft: '38px' }}>
-        <Link href={`/article/${article.slug}`} style={{ textDecoration: 'none' }}>
-          <h2
-            style={{
-              fontSize: '19px',
-              fontWeight: 700,
-              color: '#08090a',
-              lineHeight: 1.3,
-              margin: '0 0 7px',
-            }}
-            className="hover:text-blue-700"
-          >
+      {/* ------------------------------------------------------------------ */}
+      {/* Main content                                                       */}
+      {/* ------------------------------------------------------------------ */}
+
+      <div className="mt-4">
+        <Link
+          href={`/article/${article.slug}`}
+          className="block"
+        >
+          <h2 className="line-clamp-2 text-[19px] font-extrabold leading-[1.3] tracking-[-0.015em] text-slate-950 transition-colors duration-200 group-hover:text-slate-700 sm:text-xl">
             {article.title}
           </h2>
         </Link>
 
-        <p style={{ color: '#4b5563', fontSize: '14px', lineHeight: 1.55, margin: '0 0 14px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <p className="mt-2 line-clamp-4 text-[10px] leading-6 text-slate-500 sm:text-sm">
           {preview}
         </p>
+      </div>
 
-        {article.comments && article.comments.length > 0 && (
-          <CommentPreview comments={article.comments} slug={article.slug} />
-        )}
+      {/* ------------------------------------------------------------------ */}
+      {/* Tags                                                               */}
+      {/* ------------------------------------------------------------------ */}
 
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
-            {tags.slice(0, 4).map((tag) => (
-              <Link
-                key={tag.id}
-                href={`/tag/${tag.slug}`}
-                style={{
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  color: '#4b5563',
-                  fontSize: '12px',
-                  textDecoration: 'none',
-                  fontWeight: 400,
-                }}
-                className="hover:bg-gray-100"
-              >
-                #{tag.name}
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-            <button
-              onClick={() => handleReact('LIKE')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '5px 8px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-                fontSize: '13px',
-                color: liked ? '#ef4444' : '#6b7280',
-                fontFamily: 'inherit',
-                transition: 'all 0.1s',
-              }}
-              className="hover:bg-red-50"
-            >
-              <Heart size={15} fill={liked ? '#ef4444' : 'none'} color={liked ? '#ef4444' : '#6b7280'} />
-              {likeCount} simsiree
-            </button>
+      {tags.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {tags.slice(0, 4).map((tag) => (
             <Link
-              href={`/article/${article.slug}#yaadawwan`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '5px 8px',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontSize: '13px',
-                color: '#6b7280',
-                transition: 'background 0.1s',
-              }}
-              className="hover:bg-gray-100"
+              key={tag.id}
+              href={`/tag/${tag.slug}`}
+              className="rounded-full border border-slate-200/80 px-2 py-1 text-[10px] font-medium text-slate-500 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
             >
-              <MessageCircle size={15} />
-              {article._count.comments} yaada
+              #{tag.name}
             </Link>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', color: '#9ca3af' }}>
-              daqiiqaa {article.readingTime}
+          ))}
+
+          {tags.length > 4 && (
+            <span className="px-1 py-1 text-[10px] text-slate-400">
+              +{tags.length - 4}
             </span>
-            <button
-              onClick={handleBookmark}
-              style={{
-                padding: '5px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'all 0.1s',
-              }}
-              className="hover:bg-gray-100"
-            >
-              <Bookmark
-                size={16}
-                fill={bookmarked ? '#3b49df' : 'none'}
-                color={bookmarked ? '#3b49df' : '#9ca3af'}
+          )}
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Comments                                                           */}
+      {/* ------------------------------------------------------------------ */}
+
+      {article.comments &&
+        article.comments.length > 0 && (
+          <CommentPreview
+            comments={article.comments}
+            slug={article.slug}
+          />
+        )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Footer                                                             */}
+      {/* ------------------------------------------------------------------ */}
+
+      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+        <div className="flex items-center gap-0.5">
+          {/* Like */}
+          <ActionButton
+            onClick={() =>
+              handleReact('LIKE')
+            }
+            disabled={isReacting}
+            active={liked}
+            activeClassName="bg-red-50 text-red-500"
+            icon={
+              <Heart
+                className="h-[15px] w-[15px]"
+                fill={
+                  liked
+                    ? 'currentColor'
+                    : 'none'
+                }
               />
-            </button>
-          </div>
+            }
+            label={
+              <span className="hidden sm:inline">
+                {likeCount} simsiree
+              </span>
+            }
+          />
+
+          {/* Unicorn */}
+          <ActionButton
+            onClick={() =>
+              handleReact('UNICORN')
+            }
+            disabled={isReacting}
+            active={unicorned}
+            activeClassName="bg-emerald-50 text-emerald-600"
+            icon={
+              <Zap
+                className="h-[15px] w-[15px]"
+                fill={
+                  unicorned
+                    ? 'currentColor'
+                    : 'none'
+                }
+              />
+            }
+            label={
+              unicornCount > 0
+                ? unicornCount
+                : undefined
+            }
+          />
+
+          {/* Comments */}
+          <Link
+            href={`/article/${article.slug}#yaadawwan`}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-800"
+          >
+            <MessageCircle className="h-[15px] w-[15px]" />
+            <span>
+              {article._count.comments}
+            </span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Reading time */}
+          <span className="hidden text-[11px] text-slate-400 sm:block">
+            {article.readingTime} min read
+          </span>
+
+          {/* Bookmark */}
+          <button
+            type="button"
+            onClick={handleBookmark}
+            disabled={isBookmarking}
+            aria-label={
+              bookmarked
+                ? 'Remove bookmark'
+                : 'Bookmark article'
+            }
+            className={[
+              'rounded-lg p-1.5 transition-all duration-200',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300',
+              'disabled:pointer-events-none disabled:opacity-50',
+              bookmarked
+                ? 'bg-slate-100 text-slate-900'
+                : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700',
+            ].join(' ')}
+          >
+            <Bookmark
+              className="h-4 w-4"
+              fill={
+                bookmarked
+                  ? 'currentColor'
+                  : 'none'
+              }
+            />
+          </button>
         </div>
       </div>
     </article>

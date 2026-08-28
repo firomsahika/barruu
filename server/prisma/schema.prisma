@@ -16,6 +16,9 @@ enum Role {
 }
 
 enum Category {
+  ODUU
+  MAMMAAKSA
+  SEENAA
   WALALOO
   DURDURII
   ASOOSAMA

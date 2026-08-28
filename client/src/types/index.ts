@@ -1,4 +1,4 @@
-export type Category = 'WALALOO' | 'DURDURII' | 'ASOOSAMA' | 'OOLMAA' | 'SAGALEE';
+export type Category = 'ODUU' | 'MAMMAAKSA' | 'SEENAA' | 'WALALOO' | 'DURDURII' | 'ASOOSAMA' | 'OOLMAA' | 'SAGALEE';
 export type ReactionType = 'LIKE' | 'UNICORN';
 
 export interface Tag {
@@ -88,6 +88,9 @@ export interface ArticlesResponse {
 }
 
 export const CATEGORY_LABELS: Record<Category, string> = {
+  ODUU: 'Oduu',
+  MAMMAAKSA: 'Mammaaksa',
+  SEENAA: 'Seenaa',
   WALALOO: 'Walaloo',
   DURDURII: 'Durdurii',
   ASOOSAMA: 'Asoosama',
@@ -96,6 +99,9 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 export const CATEGORY_COLORS: Record<Category, string> = {
+  ODUU: '#2563eb',
+  MAMMAAKSA: '#ca8a04',
+  SEENAA: '#9333ea',
   WALALOO: '#7c3aed',
   DURDURII: '#ea580c',
   ASOOSAMA: '#0891b2',

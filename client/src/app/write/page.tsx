@@ -19,7 +19,7 @@ import api, { getApiErrorMessage } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Category, CATEGORY_LABELS } from '@/types';
 
-const CATEGORIES: Category[] = ['WALALOO', 'DURDURII', 'ASOOSAMA', 'OOLMAA', 'SAGALEE'];
+const CATEGORIES: Category[] = ['ODUU', 'MAMMAAKSA', 'SEENAA', 'WALALOO', 'DURDURII', 'ASOOSAMA', 'OOLMAA', 'SAGALEE'];
 
 export default function WritePage() {
   const { user, isInitialized } = useAuthStore();
@@ -568,10 +568,10 @@ export default function WritePage() {
           >
             <button
               onClick={() => handleSave(true)}
+              className="bg-slate-800"
               disabled={isPublishing}
               style={{
                 padding: '10px 20px',
-                backgroundColor: isPublishing ? '#6b7280' : '#3b49df',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',

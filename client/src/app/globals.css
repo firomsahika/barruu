@@ -48,6 +48,15 @@ select {
   font: inherit;
 }
 
+button {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+button:hover:not(:disabled) {
+  background-color: #334155 !important;
+}
+
 ::selection {
   background: #c7d2fe;
   color: #1e1b4b;

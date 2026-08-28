@@ -6,7 +6,7 @@ export const createArticleSchema = z.object({
   excerpt: z.string().optional(),
   coverImageUrl: z.string().url().optional().or(z.literal('')),
   audioUrl: z.string().url().optional().or(z.literal('')),
-  category: z.enum(['WALALOO', 'DURDURII', 'ASOOSAMA', 'OOLMAA', 'SAGALEE']).optional(),
+  category: z.enum(['ODUU', 'MAMMAAKSA', 'SEENAA', 'WALALOO', 'DURDURII', 'ASOOSAMA', 'OOLMAA', 'SAGALEE']).optional(),
   tags: z.array(z.string()).optional(),
   published: z.boolean().optional(),
 });

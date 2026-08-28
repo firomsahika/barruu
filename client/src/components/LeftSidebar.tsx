@@ -5,11 +5,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { useTags } from '@/hooks/useTags';
+import { useAuthStore } from '@/store/authStore';
 
 // Compact labels keep the navigation scannable.
 const navItems = [
   { icon: '🏠', label: 'Home', href: '/' },
   { icon: '🏆', label: 'Filatamoo', href: '/?sort=top' },
+  { icon: '📰', label: 'Oduu', href: '/oduu' },
+  { icon: '💬', label: 'Mammaaksa', href: '/mammaaksa' },
+  { icon: '🏛️', label: 'Seenaa', href: '/seenaa' },
   { icon: '📖', label: 'Walaloo', href: '/walaloo' },
   { icon: '📜', label: 'Durdurii', href: '/durdurii' },
   { icon: '📚', label: 'Asoosama', href: '/asoosama' },
@@ -19,6 +23,7 @@ const navItems = [
 export default function LeftSidebar() {
   const pathname = usePathname();
   const { data: tags = [] } = useTags();
+  const {user} = useAuthStore();
   const [tagFilter, setTagFilter] = useState('');
 
   const filteredTags = tags
@@ -51,7 +56,9 @@ export default function LeftSidebar() {
       <div className="h-px bg-gray-200 my-3" />
 
       {/* Community Callout Card */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 shadow-sm">
+      {
+        user ? (  <div></div>):(
+          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 shadow-sm">
         <h3 className="text-[15px] font-bold text-gray-900 leading-snug">
           Siidaa Barruu fi Aadaa Oromoo
         </h3>
@@ -72,7 +79,10 @@ export default function LeftSidebar() {
             Seeni
           </Link>
         </div>
-      </div>
+      </div> )
+   
+      }
+    
 
       {/* Popular Tags Section */}
       <div className="space-y-2">
