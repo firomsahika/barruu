@@ -3,144 +3,354 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search } from 'lucide-react';
+import {
+  Home,
+  Trophy,
+  Newspaper,
+  MessageCircle,
+  Landmark,
+  BookOpen,
+  ScrollText,
+  Library,
+  Wheat,
+  Mic2,
+  Search,
+  ArrowRight,
+  LogIn,
+  UserPlus,
+  Hash,
+} from 'lucide-react';
+
 import { useTags } from '@/hooks/useTags';
 import { useAuthStore } from '@/store/authStore';
 
-// Compact labels keep the navigation scannable.
-const navItems = [
-  { icon: '🏠', label: 'Home', href: '/' },
-  { icon: '🏆', label: 'Filatamoo', href: '/?sort=top' },
-  { icon: '📰', label: 'Oduu', href: '/oduu' },
-  { icon: '💬', label: 'Mammaaksa', href: '/mammaaksa' },
-  { icon: '🏛️', label: 'Seenaa', href: '/seenaa' },
-  { icon: '📖', label: 'Walaloo', href: '/walaloo' },
-  { icon: '📜', label: 'Durdurii', href: '/durdurii' },
-  { icon: '📚', label: 'Asoosama', href: '/asoosama' },
-  { icon: '🎙️', label: 'Sagalee', href: '/sagalee' },
+const mainNavItems = [
+  {
+    icon: Home,
+    label: 'Home',
+    href: '/',
+  },
+  {
+    icon: Trophy,
+    label: 'Filatamoo',
+    href: '/?sort=top',
+  },
 ];
+
+const cultureNavItems = [
+  {
+    icon: Newspaper,
+    label: 'Oduu',
+    href: '/oduu',
+  },
+  {
+    icon: MessageCircle,
+    label: 'Mammaaksa',
+    href: '/mammaaksa',
+  },
+  {
+    icon: Landmark,
+    label: 'Seenaa',
+    href: '/seenaa',
+  },
+  {
+    icon: BookOpen,
+    label: 'Walaloo',
+    href: '/walaloo',
+  },
+  {
+    icon: ScrollText,
+    label: 'Durdurii',
+    href: '/durdurii',
+  },
+  {
+    icon: Library,
+    label: 'Asoosama',
+    href: '/asoosama',
+  },
+  {
+    icon: Wheat,
+    label: 'Olmaa',
+    href: '/olmaa',
+  },
+  {
+    icon: Mic2,
+    label: 'Sagalee',
+    href: '/sagalee',
+  },
+];
+
+function NavigationItem({
+  icon: Icon,
+  label,
+  href,
+  active,
+}: {
+  icon: React.ElementType;
+  label: string;
+  href: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={[
+        'group relative flex items-center gap-3 rounded-lg px-3 py-2',
+        'text-[13px] transition-all duration-200',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300',
+        active
+          ? 'bg-slate-100 font-semibold text-slate-950'
+          : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900',
+      ].join(' ')}
+    >
+      {/* Active indicator */}
+
+      {active && (
+        <span className="absolute -left-[1px] top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-slate-900" />
+      )}
+
+      <Icon
+        className={[
+          'h-[17px] w-[17px] shrink-0 transition-colors',
+          active
+            ? 'text-slate-900'
+            : 'text-slate-400 group-hover:text-slate-700',
+        ].join(' ')}
+        strokeWidth={active ? 2.2 : 1.8}
+      />
+
+      <span>{label}</span>
+    </Link>
+  );
+}
 
 export default function LeftSidebar() {
   const pathname = usePathname();
+
   const { data: tags = [] } = useTags();
-  const {user} = useAuthStore();
+  const { user } = useAuthStore();
+
   const [tagFilter, setTagFilter] = useState('');
 
   const filteredTags = tags
-    .filter((t: any) => t.name.toLowerCase().includes(tagFilter.toLowerCase()))
-    .slice(0, 8);
+    .filter((tag: any) =>
+      tag.name
+        .toLowerCase()
+        .includes(tagFilter.toLowerCase())
+    )
+    .slice(0, 7);
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+
+    return pathname === href;
+  };
 
   return (
-    <aside className="w-full space-y-5 text-[#171717]">
-      {/* Navigation Links with Colored Emoji Icons */}
-      <nav className="space-y-1">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md text-xs transition-all ${isActive
-                ? 'bg-white font-semibold text-gray-900 border border-gray-200 shadow-sm'
-                : 'font-medium text-gray-600 hover:bg-white hover:text-blue-600'
-                }`}
-            >
-              <span className="text-base leading-none">{item.icon}</span>
-              <span className="text-[13px]">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+    <aside className="w-full">
+      <div className="sticky top-20">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-sm shadow-slate-200/30">
+          {/* ============================================================ */}
+          {/* Main navigation                                               */}
+          {/* ============================================================ */}
 
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-3" />
+          <nav className="space-y-0.5">
+            {mainNavItems.map((item) => (
+              <NavigationItem
+                key={item.href}
+                {...item}
+                active={isActive(item.href)}
+              />
+            ))}
+          </nav>
 
-      {/* Community Callout Card */}
-      {
-        user ? (  <div></div>):(
-          <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 shadow-sm">
-        <h3 className="text-[15px] font-bold text-gray-900 leading-snug">
-          Siidaa Barruu fi Aadaa Oromoo
-        </h3>
-        <p className="text-[13px] text-gray-500 font-normal leading-relaxed">
-          Siidaa Barruu bakka barruu aadaa fi seenaa Afaan Oromoo maxxansuu fi dubbisuu dandeessuudha.
-        </p>
-        <div className="space-y-2 pt-1">
-          <Link
-            href="/register"
-            className="block text-center w-full py-2 px-3 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-600 rounded-md transition-colors"
-          >
-            Galmaa'i Amma
-          </Link>
-          <Link
-            href="/login"
-            className="block text-center w-full py-2 px-3 text-[13px] font-medium text-gray-700 hover:bg-gray-100 rounded-md border border-gray-200 transition-colors"
-          >
-            Seeni
-          </Link>
-        </div>
-      </div> )
-   
-      }
-    
+          {/* ============================================================ */}
+          {/* Section divider                                               */}
+          {/* ============================================================ */}
 
-      {/* Popular Tags Section */}
-      <div className="space-y-2">
-        <h3 className="text-[11px] font-bold text-gray-500 px-3 uppercase tracking-[0.12em]">
-          Tegoolee Baay'ee Fayyadamamu
-        </h3>
+          <div className="my-3 px-3">
+            <div className="h-px bg-slate-100" />
+          </div>
 
-        {/* Search Input Filter */}
-        <div className="px-3 relative">
-          <Search size={14} className="text-gray-400 absolute left-5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Teg barbaadi..."
-            value={tagFilter}
-            onChange={(e) => setTagFilter(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 text-[13px] bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 placeholder:text-gray-400"
-          />
-        </div>
+          {/* ============================================================ */}
+          {/* Culture navigation                                            */}
+          {/* ============================================================ */}
 
-        {/* Tags List */}
-        <div className="space-y-0.5 pt-1">
-          {filteredTags.map((tag: any) => (
-            <Link
-              key={tag.slug}
-              href={`/tag/${tag.slug}`}
-              className="flex items-center justify-between px-3 py-2 rounded-md text-[13px] font-medium text-gray-600 hover:bg-white hover:text-blue-600 transition-all"
-            >
-              <span>#{tag.name}</span>
-              <span className="text-xs text-gray-400 font-light">
-                {tag._count?.articles || 0} barruu
+          <div>
+            <div className="mb-1 px-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                Aadaa fi Barruu
               </span>
-            </Link>
-          ))}
-        </div>
-      </div>
+            </div>
 
-      {/* Footer Meta Links */}
-      <div className="pt-2 px-3 space-y-2">
-        <div className="text-xs text-gray-400 font-light flex flex-wrap gap-1.5 leading-relaxed">
-          <Link href="/waa-nu-bira" className="hover:text-blue-600 hover:underline">
-            Waa Nu Bira
-          </Link>
-          <span>·</span>
-          <Link href="/seera-fayyadama" className="hover:text-blue-600 hover:underline">
-            Seera
-          </Link>
-          <span>·</span>
-          <Link href="/dhuunfaa" className="hover:text-blue-600 hover:underline">
-            Dhuunfaa
-          </Link>
-          <span>·</span>
-          <Link href="/quunnamtii" className="hover:text-blue-600 hover:underline">
-            Quunnamtii
-          </Link>
+            <nav className="space-y-0.5">
+              {cultureNavItems.map((item) => (
+                <NavigationItem
+                  key={item.href}
+                  {...item}
+                  active={isActive(item.href)}
+                />
+              ))}
+            </nav>
+          </div>
+
+          {/* ============================================================ */}
+          {/* Community CTA                                                 */}
+          {/* ============================================================ */}
+
+          {!user && (
+            <>
+              <div className="my-3 px-3">
+                <div className="h-px bg-slate-100" />
+              </div>
+
+              <div className="mx-1 rounded-xl bg-slate-950 p-3.5">
+                <div className="mb-3">
+                  <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                    <BookOpen className="h-4 w-4 text-white" />
+                  </div>
+
+                  <h3 className="text-[13px] font-bold leading-5 text-white">
+                    Hawaasa keenya waliin
+                  </h3>
+
+                  <p className="mt-1.5 text-[11px] leading-[1.55] text-slate-400">
+                    Barruu kee qoodi, yaada kee ibsi,
+                    hawaasa keenya waliin wal qunnami.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Link
+                    href="/register"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-bold text-slate-950 transition-all hover:bg-slate-100"
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    Galmaa'i
+                  </Link>
+
+                  <Link
+                    href="/login"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-[11px] font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
+                  >
+                    <LogIn className="h-3.5 w-3.5" />
+                    Seeni
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ============================================================ */}
+          {/* Popular tags                                                   */}
+          {/* ============================================================ */}
+
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between px-3">
+              <div className="flex items-center gap-1.5">
+                <Hash className="h-3.5 w-3.5 text-slate-400" />
+
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
+                  Tegoolee
+                </h3>
+              </div>
+
+              <span className="text-[9px] text-slate-300">
+                Baay'ee fayyadaman
+              </span>
+            </div>
+
+            {/* Search */}
+
+            <div className="relative px-2">
+              <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+
+              <input
+                type="text"
+                placeholder="Teg barbaadi..."
+                value={tagFilter}
+                onChange={(e) =>
+                  setTagFilter(e.target.value)
+                }
+                className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-[11px] text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-slate-300 focus:bg-white focus:ring-2 focus:ring-slate-100"
+              />
+            </div>
+
+            {/* Tags */}
+
+            <div className="mt-1.5 space-y-0.5">
+              {filteredTags.length > 0 ? (
+                filteredTags.map((tag: any) => (
+                  <Link
+                    key={tag.slug}
+                    href={`/tag/${tag.slug}`}
+                    className="group flex items-center justify-between rounded-lg px-3 py-1.5 transition-colors hover:bg-slate-50"
+                  >
+                    <span className="max-w-[125px] truncate text-[11px] font-medium text-slate-500 transition-colors group-hover:text-slate-900">
+                      #{tag.name}
+                    </span>
+
+                    <span className="text-[9px] text-slate-300 transition-colors group-hover:text-slate-400">
+                      {tag._count?.articles || 0}
+                    </span>
+                  </Link>
+                ))
+              ) : (
+                <p className="px-3 py-3 text-center text-[10px] text-slate-400">
+                  Teg hin argamne
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* ============================================================ */}
+          {/* Footer                                                        */}
+          {/* ============================================================ */}
+
+          <div className="mt-4 border-t border-slate-100 px-3 pb-1 pt-3">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[9px] text-slate-400">
+              <Link
+                href="/waa-nu-bira"
+                className="transition-colors hover:text-slate-700"
+              >
+                Waa Nu Bira
+              </Link>
+
+              <span className="text-slate-200">•</span>
+
+              <Link
+                href="/seera-fayyadama"
+                className="transition-colors hover:text-slate-700"
+              >
+                Seera
+              </Link>
+
+              <span className="text-slate-200">•</span>
+
+              <Link
+                href="/dhuunfaa"
+                className="transition-colors hover:text-slate-700"
+              >
+                Dhuunfaa
+              </Link>
+
+              <span className="text-slate-200">•</span>
+
+              <Link
+                href="/quunnamtii"
+                className="transition-colors hover:text-slate-700"
+              >
+                Quunnamtii
+              </Link>
+            </div>
+
+            <p className="mt-2 text-[9px] text-slate-300">
+              Siidaa Barruu · 2026
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-gray-400 font-light">
-          Siidaa Barruu Community 2026
-        </p>
       </div>
     </aside>
   );

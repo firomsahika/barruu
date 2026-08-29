@@ -65,7 +65,7 @@ export default function HomePage() {
         </div>
 
         {/* Main Feed */}
-        <main className="space-y-4">
+        <main className="min-w-0 space-y-4">
           {/* Top "What's on your mind?" Search Box */}
           <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
             <SearchInput placeholder="What's on your mind?" />
@@ -73,6 +73,7 @@ export default function HomePage() {
 
           {/* Navigation Filter Tabs */}
           <div
+            className="max-w-full overflow-x-auto"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -86,6 +87,7 @@ export default function HomePage() {
               return (
                 <button
                   key={tab.id}
+                  data-button-unstyled
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-1.5 px-3 py-2 bg-transparent cursor-pointer text-xs font-sans -mb-px transition-all duration-100 ${activeTab === tab.id
                     ? 'font-bold text-[#08090a] border-b-2 border-[#3b49df]'

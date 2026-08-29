@@ -128,6 +128,7 @@ function ActionButton({
   return (
     <button
       type="button"
+      data-button-unstyled
       onClick={onClick}
       disabled={disabled}
       className={[
@@ -310,7 +311,7 @@ export default function ArticleCard({
           href={`/article/${article.slug}`}
           className="relative block overflow-hidden"
         >
-          <div className="relative h-[260px] w-full overflow-hidden bg-slate-100 sm:h-[320px]">
+          <div className="relative h-[150px] w-full overflow-hidden bg-slate-100 sm:h-[100px]">
             {article.coverImageUrl ? (
               <img
                 src={article.coverImageUrl}
@@ -487,6 +488,7 @@ export default function ArticleCard({
             {/* Bookmark */}
             <button
               type="button"
+              data-button-unstyled
               onClick={handleBookmark}
               disabled={isBookmarking}
               aria-label={

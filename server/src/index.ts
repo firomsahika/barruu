@@ -9,6 +9,7 @@ import tagRoutes from './routes/tags';
 import userRoutes from './routes/users';
 import commentRoutes from './routes/comments';
 import notificationRoutes from './routes/notifications';
+import uploadRoutes from './routes/uploads';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/tags', tagRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {

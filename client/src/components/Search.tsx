@@ -87,6 +87,7 @@ export default function SearchInput({ placeholder = 'Search...' }: SearchInputPr
           {searchQuery && (
             <button
               type="button"
+              data-button-unstyled
               onClick={() => {
                 setSearchQuery('');
                 setSearchResults([]);

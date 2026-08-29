@@ -29,6 +29,7 @@ export default function ReactionSidebar({
   return (
     <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
       <button
+        data-button-unstyled
         onClick={() => router.back()}
         style={{
           width: '40px',
@@ -48,6 +49,7 @@ export default function ReactionSidebar({
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
         <button
+          data-button-unstyled
           onClick={() => onReact('LIKE')}
           style={{
             width: '40px',
@@ -69,6 +71,7 @@ export default function ReactionSidebar({
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
         <button
+          data-button-unstyled
           onClick={() => onReact('UNICORN')}
           style={{
             width: '40px',
@@ -90,6 +93,7 @@ export default function ReactionSidebar({
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
         <button
+          data-button-unstyled
           onClick={onBookmark}
           style={{
             width: '40px',
@@ -109,6 +113,7 @@ export default function ReactionSidebar({
       </div>
 
       <button
+        data-button-unstyled
         onClick={onShare}
         style={{
           width: '40px',

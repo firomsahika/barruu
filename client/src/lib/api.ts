@@ -43,3 +43,20 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export async function uploadImage(file: File, folder: 'avatars' | 'article-covers'): Promise<string> {
+  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+    throw new Error('JPG, PNG, WebP ykn GIF qofa fayyadami');
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Fakkiin guddaan 5MB caaluu hin qabu');
+  }
+
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('folder', folder);
+  const response = await api.post('/uploads/image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.url as string;
+}
