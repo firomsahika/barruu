@@ -49,21 +49,21 @@ export default function RightSidebar() {
       </div>
 
       {/* Studio spot card */}
-      <div className="mb-4 rounded-lg bg-slate-800 p-5 text-white shadow-sm">
+      <div className="mb-4 overflow-hidden rounded-2xl bg-[#176b4d] p-5 text-white shadow-lg shadow-emerald-950/10">
         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-blue-200">
-          BARREESSAA TA&apos;I
+          SAGALEE KEE KUUSI
         </div>
         <h3 className="mb-2 text-xs font-extrabold leading-snug">
-          Barruu Kee Publish Godhi
+          Seenaa keenyaaf jecha dabali
         </h3>
         <p className="mb-3.5 text-[13px] leading-relaxed text-blue-100">
-          Yaada kee dubbistoota kuma hedduuf hirmaachisi. Amma barreessuu jalqabi!
+          Mammaaksa, walaloo, seenaa fi yaada kee hawaasa Oromoof kuusi.
         </p>
         <Link
           href="/write"
           className="inline-block rounded-md bg-white px-4 py-2 text-[13px] font-bold text-blue-900 no-underline transition-opacity hover:opacity-95"
         >
-          Barreessi Amma →
+          Barreessuu jalqabi →
         </Link>
       </div>
 

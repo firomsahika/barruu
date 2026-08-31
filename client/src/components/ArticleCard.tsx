@@ -10,6 +10,8 @@ import {
   Bookmark,
   Zap,
   ArrowUpRight,
+  Clock3,
+  Eye,
 } from 'lucide-react';
 import {
   Article,
@@ -132,7 +134,7 @@ function ActionButton({
       onClick={onClick}
       disabled={disabled}
       className={[
-        'group inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
+        'group inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 py-1.5',
         'text-xs font-medium transition-all duration-200',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300',
         'disabled:pointer-events-none disabled:opacity-50',
@@ -302,7 +304,7 @@ export default function ArticleCard({
 
   if (featured) {
     return (
-      <article className="group relative mb-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50">
+    <article className="group relative mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50">
         {/* ------------------------------------------------------------------ */}
         {/* Cover                                                              */}
         {/* ------------------------------------------------------------------ */}
@@ -311,7 +313,7 @@ export default function ArticleCard({
           href={`/article/${article.slug}`}
           className="relative block overflow-hidden"
         >
-          <div className="relative h-[150px] w-full overflow-hidden bg-slate-100 sm:h-[100px]">
+          <div className="relative h-56 w-full overflow-hidden bg-slate-100 sm:h-72">
             {article.coverImageUrl ? (
               <img
                 src={article.coverImageUrl}
@@ -334,7 +336,7 @@ export default function ArticleCard({
             )}
 
             {/* Image overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
             {/* Category */}
             <div className="absolute left-5 top-5">
@@ -346,9 +348,9 @@ export default function ArticleCard({
             </div>
 
             {/* Reading time */}
-            <div className="absolute bottom-5 right-5">
-              <span className="rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
-                {article.readingTime} min read
+            <div className="absolute bottom-5 left-5">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
+                <Clock3 className="h-3.5 w-3.5" /> {article.readingTime} daqiiqaa dubbisi
               </span>
             </div>
           </div>
@@ -358,7 +360,7 @@ export default function ArticleCard({
         {/* Content                                                            */}
         {/* ------------------------------------------------------------------ */}
 
-        <div className="p-5 sm:p-6">
+        <div className="p-5 sm:p-7">
           {/* Author */}
           <div className="mb-4 flex items-center gap-3">
             <Link
@@ -381,7 +383,7 @@ export default function ArticleCard({
               </Link>
 
               <div className="text-xs text-slate-400">
-                {formatRelativeDate(article.createdAt)}
+                {formatRelativeDate(article.createdAt)} · Barreessaa
               </div>
             </div>
           </div>
@@ -391,13 +393,13 @@ export default function ArticleCard({
             href={`/article/${article.slug}`}
             className="block"
           >
-            <h2 className="max-w-3xl text-2xl font-extrabold leading-tight tracking-[-0.025em] text-slate-950 transition-colors duration-200 group-hover:text-slate-700 sm:text-[28px]">
+            <h2 className="max-w-3xl font-serif text-2xl font-semibold leading-[1.15] tracking-[-0.025em] text-slate-950 transition-colors duration-200 group-hover:text-[#176b4d] sm:text-[32px]">
               {article.title}
             </h2>
           </Link>
 
           {/* Excerpt */}
-          <p className="mt-3 line-clamp-2 max-w-2xl text-[13.5px] leading-5 text-slate-500">
+          <p className="mt-4 line-clamp-3 max-w-2xl text-sm leading-6 text-slate-500">
             {preview}
           </p>
 
@@ -408,7 +410,7 @@ export default function ArticleCard({
                 <Link
                   key={tag.id}
                   href={`/tag/${tag.slug}`}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500 transition-all duration-200 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500 transition-all duration-200 hover:border-[#176b4d]/30 hover:bg-[#e7f3eb] hover:text-[#176b4d]"
                 >
                   #{tag.name}
                 </Link>
@@ -525,7 +527,8 @@ export default function ArticleCard({
   /* ======================================================================== */
 
   return (
-    <article className="group mb-3 rounded-2xl border border-slate-200/80 bg-white p-4 transition-all duration-300 hover:-translate-y-[1px] hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/40 sm:p-5">
+    <article className="group relative mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-[1px] hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/40 sm:p-6">
+      <div className="absolute inset-y-0 left-0 w-1 bg-[#176b4d] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                             */}
       {/* ------------------------------------------------------------------ */}
@@ -539,7 +542,7 @@ export default function ArticleCard({
           <img
             src={getAvatarUrl(article.author)}
             alt={article.author.name}
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-50 transition-all duration-200 group-hover:ring-slate-100"
+            className="h-10 w-10 rounded-full object-cover ring-2 ring-slate-50 transition-all duration-200 group-hover:ring-[#e7f3eb]"
           />
         </Link>
 
@@ -552,15 +555,15 @@ export default function ArticleCard({
             {article.author.name}
           </Link>
 
-          <span className="text-[11px] text-slate-400">
-            {formatRelativeDate(article.createdAt)}
+          <span className="text-xs text-slate-400">
+            {formatRelativeDate(article.createdAt)} · {article.readingTime} daqiiqaa
           </span>
         </div>
 
         {/* Category */}
         <div className="ml-auto">
           <span
-            className="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide"
+            className="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em]"
             style={{
               color: categoryColor,
               borderColor: `${categoryColor}30`,
@@ -576,17 +579,17 @@ export default function ArticleCard({
       {/* Main content                                                       */}
       {/* ------------------------------------------------------------------ */}
 
-      <div className="mt-4">
+      <div className="mt-5">
         <Link
           href={`/article/${article.slug}`}
           className="block"
         >
-          <h2 className="line-clamp-2 text-[19px] font-extrabold leading-[1.3] tracking-[-0.015em] text-slate-950 transition-colors duration-200 group-hover:text-slate-700 sm:text-xl">
+          <h2 className="line-clamp-2 font-serif text-xl font-semibold leading-[1.25] tracking-[-0.015em] text-slate-950 transition-colors duration-200 group-hover:text-[#176b4d] sm:text-2xl">
             {article.title}
           </h2>
         </Link>
 
-        <p className="mt-2 line-clamp-4 text-[10px] leading-6 text-slate-500 sm:text-sm">
+        <p className="mt-3 line-clamp-3 max-w-3xl text-sm leading-6 text-slate-500">
           {preview}
         </p>
       </div>
@@ -601,7 +604,7 @@ export default function ArticleCard({
             <Link
               key={tag.id}
               href={`/tag/${tag.slug}`}
-              className="rounded-full border border-slate-200/80 px-2 py-1 text-[10px] font-medium text-slate-500 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+            className="rounded-md border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500 transition-all duration-200 hover:border-[#176b4d]/30 hover:bg-[#e7f3eb] hover:text-[#176b4d]"
             >
               #{tag.name}
             </Link>
@@ -631,7 +634,7 @@ export default function ArticleCard({
       {/* Footer                                                             */}
       {/* ------------------------------------------------------------------ */}
 
-      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3">
         <div className="flex items-center gap-0.5">
           {/* Like */}
           <ActionButton
@@ -697,8 +700,8 @@ export default function ArticleCard({
 
         <div className="flex items-center gap-2">
           {/* Reading time */}
-          <span className="hidden text-[11px] text-slate-400 sm:block">
-            {article.readingTime} min read
+          <span className="hidden items-center gap-1 text-xs text-slate-400 sm:inline-flex">
+            <Eye className="h-3.5 w-3.5" /> {article.viewCount} · <Clock3 className="ml-1 h-3.5 w-3.5" /> {article.readingTime} daqiiqaa
           </span>
 
           {/* Bookmark */}

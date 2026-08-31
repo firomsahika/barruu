@@ -1,48 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Header from '@/components/Header';
 import LeftSidebar from '@/components/LeftSidebar';
 import RightSidebar from '@/components/RightSidebar';
 import ArticleCard from '@/components/ArticleCard';
 import { useArticles } from '@/hooks/useArticles';
 import SearchInput from '@/components/Search';
-import { Compass, Zap, Users, LucideIcon } from 'lucide-react';
-import { Article } from '@/types';
+import { ArrowRight, BookOpen, Compass, Feather, Sparkles, Zap, LucideIcon } from 'lucide-react';
+import Link from 'next/link';
 
 type SortTab = 'relevant' | 'latest' | 'top';
 
 const TABS: { id: SortTab; label: string; icon: LucideIcon }[] = [
-  { id: 'relevant', label: 'Discover', icon: Compass },
-  { id: 'latest', label: 'Latest', icon: Zap },
-  { id: 'top', label: 'Following', icon: Users },
+  { id: 'relevant', label: 'Argadhu', icon: Compass },
+  { id: 'latest', label: 'Haaraa', icon: Zap },
+  { id: 'top', label: 'Filatamoo', icon: Sparkles },
 ];
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<SortTab>('relevant');
   const [page, setPage] = useState(1);
-  const [displayedArticles, setDisplayedArticles] = useState<Article[]>([]);
 
   const { data, isLoading } = useArticles({ sort: activeTab, page, limit: 10 });
   const articles = data?.articles || [];
   const totalPages = data?.pagination.pages || 1;
-
-  useEffect(() => {
-    setDisplayedArticles((previous) => page === 1
-      ? articles
-      : [...previous, ...articles.filter((article) => !previous.some((item) => item.id === article.id))]);
-  }, [articles, page]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [activeTab]);
 
   const loadMore = () => {
     if (page < totalPages) setPage(page + 1);
   };
 
   return (
-    <div className="" style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+    <div className="min-h-screen bg-[#f7f8f5]">
       <Header />
 
       {/* Added responsive horizontal padding with px-4 md:px-10 lg:px-20 */}
@@ -66,9 +55,31 @@ export default function HomePage() {
 
         {/* Main Feed */}
         <main className="min-w-0 space-y-4">
-          {/* Top "What's on your mind?" Search Box */}
-          <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
-            <SearchInput placeholder="What's on your mind?" />
+          <section className="relative overflow-hidden rounded-3xl bg-[#173f31] px-6 py-8 text-white shadow-xl shadow-emerald-950/10 sm:px-8 sm:py-10">
+            <div className="absolute -right-12 -top-16 h-56 w-56 rounded-full border-[28px] border-[#d49a32]/20" />
+            <div className="relative max-w-xl">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[#f6d68c]">
+                <BookOpen size={14} /> Mana kuusaa barruu Oromoo
+              </div>
+              <h1 className="max-w-lg font-serif text-3xl font-semibold leading-tight tracking-[-0.02em] sm:text-4xl">
+                Jechoota keenya, dhalootaaf haa kuusnu.
+              </h1>
+              <p className="mt-3 max-w-md text-sm leading-6 text-emerald-50/80">
+                Barruu jechuun mana waloo seenaa, aadaa fi kalaqaa Afaan Oromoo ti.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/write" className="inline-flex items-center gap-2 rounded-xl bg-[#d49a32] px-4 py-2.5 text-sm font-bold text-[#173f31] transition hover:bg-[#e8b451]">
+                  <Feather size={16} /> Barruu qoodi
+                </Link>
+                <Link href="/seenaa" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
+                  Seenaa keenya ilaali <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm">
+            <SearchInput placeholder="Barruu, barreessaa ykn mata-duree barbaadi" />
           </div>
 
           {/* Navigation Filter Tabs */}
@@ -78,7 +89,7 @@ export default function HomePage() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              borderBottom: '1px solid #e5e7eb',
+              borderBottom: '1px solid #dbe3dd',
               paddingBottom: '0',
             }}
           >
@@ -88,9 +99,12 @@ export default function HomePage() {
                 <button
                   key={tab.id}
                   data-button-unstyled
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setPage(1);
+                  }}
                   className={`flex items-center gap-1.5 px-3 py-2 bg-transparent cursor-pointer text-xs font-sans -mb-px transition-all duration-100 ${activeTab === tab.id
-                    ? 'font-bold text-[#08090a] border-b-2 border-[#3b49df]'
+                    ? 'font-bold text-[#173f31] border-b-2 border-[#176b4d]'
                     : 'font-normal text-gray-500 border-b-2 border-transparent'
                     }`}
                 >
@@ -99,6 +113,14 @@ export default function HomePage() {
                 </button>
               );
             })}
+          </div>
+
+          <div className="flex items-end justify-between px-1">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#176b4d]">Kuusaa Barruu</p>
+              <h2 className="mt-1 font-serif text-xl font-semibold text-slate-950">Dubbisaaf filadhu</h2>
+            </div>
+            <span className="text-xs text-slate-400">{data?.pagination.total ?? 0} barruu</span>
           </div>
 
           {/* Articles Section */}
@@ -136,7 +158,7 @@ export default function HomePage() {
               }}
             >
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-              <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#08090a', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#173f31', marginBottom: '8px' }}>
                 Barruuwwan hin jiran
               </h3>
               <p style={{ color: '#6b7280', fontSize: '15px' }}>
@@ -145,7 +167,7 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              {displayedArticles.map((article, index) => (
+              {articles.map((article, index) => (
                 <ArticleCard
                   key={article.id}
                   article={article}
@@ -171,7 +193,19 @@ export default function HomePage() {
                     }}
                     className="hover:bg-gray-50"
                   >
-                    Barruu Dabalataa Agarsiisi
+                    Fuula itti aanuu →
+                  </button>
+                </div>
+              )}
+              {page > 1 && (
+                <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                  <button
+                    type="button"
+                    data-button-unstyled
+                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    className="text-xs font-semibold text-[#176b4d] hover:underline"
+                  >
+                    ← Fuula duraanii ilaali
                   </button>
                 </div>
               )}

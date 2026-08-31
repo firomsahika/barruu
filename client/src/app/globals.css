@@ -5,17 +5,17 @@
 }
 
 :root {
-  --background: #f3f4f6;
-  --foreground: #08090a;
+  --background: #f7f8f5;
+  --foreground: #172117;
   --card-bg: #ffffff;
   --border: #e5e7eb;
-  --primary: #3b49df;
-  --primary-hover: #2f3dbe;
+  --primary: #176b4d;
+  --primary-hover: #10513a;
   --sidebar-bg: #ffffff;
   --text-muted: #6b7280;
   --text-secondary: #4b5563;
   --surface-subtle: #f8fafc;
-  --accent-soft: #eef2ff;
+  --accent-soft: #e7f3eb;
 }
 
 * {
@@ -38,7 +38,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
     padding: 0;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -47,15 +47,6 @@ input,
 textarea,
 select {
   font: inherit;
-}
-
-button:not([data-button-unstyled]) {
-  background-color: #1e293b !important;
-  color: #ffffff !important;
-}
-
-button:not([data-button-unstyled]):hover:not(:disabled) {
-  background-color: #334155 !important;
 }
 
 .site-header {
@@ -177,8 +168,13 @@ button:not([data-button-unstyled]):hover:not(:disabled) {
 }
 
 ::selection {
-  background: #c7d2fe;
-  color: #1e1b4b;
+  background: #cfe8d7;
+  color: #123c2c;
+}
+
+:focus-visible {
+  outline: 3px solid #d49a32;
+  outline-offset: 3px;
 }
 
 /* Prose styles for article content */

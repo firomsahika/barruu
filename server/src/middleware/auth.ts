@@ -18,9 +18,15 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
   }
 
   const token = authHeader.split(' ')[1];
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.error('JWT_SECRET is not configured');
+    res.status(503).json({ error: 'Tajaajilli yeroo kana hin qophoofne' });
+    return;
+  }
   
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
+    const decoded = jwt.verify(token, secret) as {
       id: string;
       email: string;
       role: string;
@@ -49,9 +55,14 @@ export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction
   }
 
   const token = authHeader.split(' ')[1];
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    next();
+    return;
+  }
   
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
+    const decoded = jwt.verify(token, secret) as {
       id: string;
       email: string;
       role: string;

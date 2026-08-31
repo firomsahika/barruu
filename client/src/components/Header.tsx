@@ -47,7 +47,8 @@ export default function Header() {
       <div className="flex min-w-0 max-w-2xl flex-1 items-center gap-2 sm:gap-3">
         <Link
           href="/"
-          className="flex items-center justify-center w-9 h-9 bg-[#08090a] text-white rounded-md font-extrabold text-xs tracking-tight shrink-0 hover:bg-gray-800 transition-colors"
+          aria-label="Barruu - Fuula jalqabaa"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#176b4d] font-serif text-lg font-bold text-white shadow-sm transition-colors hover:bg-[#10513a]"
         >
          B
         </Link>
@@ -61,7 +62,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <Link
             href="/write"
-            className="flex items-center gap-1.5 rounded-md bg-slate-800 px-2.5 py-2 text-xs font-semibold whitespace-nowrap text-white transition-colors hover:bg-slate-600 sm:px-3 sm:py-1.5"
+            className="flex items-center gap-1.5 rounded-lg bg-[#176b4d] px-2.5 py-2 text-xs font-semibold whitespace-nowrap text-white transition-colors hover:bg-[#10513a] sm:px-3 sm:py-1.5"
           >
             <PenLine size={15} className="sm:hidden" />
             <span className="hidden sm:inline">Barreessi</span>
@@ -132,13 +133,13 @@ export default function Header() {
             href="/login"
             className="px-3.5 py-1.5 border border-gray-200 hover:bg-gray-100 text-gray-800 rounded-md text-xs font-light whitespace-nowrap transition-colors"
           >
-            Login
+            Seeni
           </Link>
           <Link
             href="/register"
             className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-xs font-bold whitespace-nowrap transition-colors"
           >
-            Signup
+            Galmaa'i
           </Link>
         </div>
       )}
@@ -155,7 +156,7 @@ export default function Header() {
               { label: 'Walaloo', href: '/walaloo', icon: BookOpen },
               { label: 'Durdurii', href: '/durdurii', icon: ScrollText },
               { label: 'Asoosama', href: '/asoosama', icon: Library },
-              { label: 'Olmaa', href: '/olmaa', icon: Wheat },
+              { label: 'Oolmaa', href: '/oolmaa', icon: Wheat },
               { label: 'Sagalee', href: '/sagalee', icon: Mic2 },
             ].map(({ label, href, icon: Icon }) => (
               <Link
