@@ -40,21 +40,23 @@ export default function HomePage() {
         style={{
           maxWidth: '1280px',
           margin: '0 auto',
+          height: 'calc(100vh - 56px)',
           paddingTop: '20px',
           paddingBottom: '32px',
           display: 'grid',
           gridTemplateColumns: '240px 1fr 300px',
           gap: '20px',
-          alignItems: 'start',
+          alignItems: 'stretch',
+          overflow: 'hidden',
         }}
       >
         {/* Left Sidebar */}
-        <div style={{ position: 'sticky', top: '72px' }}>
+        <div className="min-h-0">
           <LeftSidebar />
         </div>
 
         {/* Main Feed */}
-        <main className="min-w-0 space-y-4">
+        <main className="min-h-0 min-w-0 space-y-4 overflow-y-auto overscroll-contain pr-1 sm:pr-2">
           <section className="relative overflow-hidden rounded-3xl bg-[#173f31] px-6 py-8 text-white shadow-xl shadow-emerald-950/10 sm:px-8 sm:py-10">
             <div className="absolute -right-12 -top-16 h-56 w-56 rounded-full border-[28px] border-[#d49a32]/20" />
             <div className="relative max-w-xl">
@@ -214,7 +216,7 @@ export default function HomePage() {
         </main>
 
         {/* Right Sidebar */}
-        <div style={{ position: 'sticky', top: '72px' }}>
+        <div className="min-h-0">
           <RightSidebar />
         </div>
       </div>
@@ -235,9 +237,14 @@ export default function HomePage() {
         @media (max-width: 768px) {
           .responsive-grid {
             grid-template-columns: 1fr !important;
+            height: auto !important;
+            overflow: visible !important;
           }
           .responsive-grid > div:first-child {
             display: none;
+          }
+          .responsive-grid main {
+            overflow: visible !important;
           }
         }
       `}</style>

@@ -252,9 +252,15 @@ export class UserService {
       throw new Error('Fayyadamaan hin argamne');
     }
 
+    const normalizedData = {
+      ...data,
+      bio: data.bio !== undefined && data.bio !== null && data.bio.trim() ? data.bio.trim() : null,
+      avatarUrl: typeof data.avatarUrl === 'string' && data.avatarUrl.trim() ? data.avatarUrl.trim() : null,
+    };
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: data,
+      data: normalizedData,
       select: {
         id: true,
         email: true,

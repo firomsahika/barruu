@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
-import { registerSchema, loginSchema, forgotPasswordSchema } from '../validations/auth.validation';
-
+import { updateProfileSchema } from '../validations/auth.validation';
 
 export class UserController {
 
@@ -24,11 +23,20 @@ export class UserController {
     static async updateProfile(req: Request, res: Response): Promise<void> {
         try {
             const userId = (req as any).user?.id;
-            const data = req.body;
+            if (!userId) {
+                res.status(401).json({ error: 'Hin seenin' });
+                return;
+            }
 
-            const updatedUser = await UserService.updateProfile(userId, data);
+            const validatedData = updateProfileSchema.parse(req.body);
+            const updatedUser = await UserService.updateProfile(userId, validatedData);
             res.json(updatedUser);
         } catch (error: any) {
+            if (error.name === 'ZodError') {
+                res.status(400).json({ error: error.errors?.[0]?.message || 'Galmeen sirrii miti' });
+                return;
+            }
+
             console.error('Update profile error:', error);
 
             if (error.message === 'USER_NOT_FOUND') {

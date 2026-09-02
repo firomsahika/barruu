@@ -42,8 +42,14 @@ export const updateProfileSchema = z.object({
     .min(3, 'Maqaan fayyadamaa qubee 3 caaluu qaba')
     .regex(/^[a-zA-Z0-9_]+$/, 'Qubee, lakkoofsa fi _ qofa fayyadami')
     .optional(),
-  bio: z.string().min(2, 'Bio qubee 2 caaluu qaba').optional(),
-  avatarUrl: z.string().url('Avatar URL sirrii hin taane').optional(),
+  bio: z.union([
+    z.string().trim().min(2, 'Bio qubee 2 caaluu qaba'),
+    z.literal(''),
+  ]).optional().transform((value) => value === '' ? '' : value),
+  avatarUrl: z.union([
+    z.string().url('Avatar URL sirrii hin taane'),
+    z.literal(''),
+  ]).optional().transform((value) => value === '' ? '' : value),
 }).refine((data) => Object.keys(data).length > 0, {
   message: 'Yoo xiqqaate odeeffannoo tokko fooyyessi',
 });

@@ -28,11 +28,23 @@ export default function DashboardPage() {
     }
   }, [isInitialized, user, router]);
 
+  const persistProfile = async (nextAvatarUrl?: string) => {
+    const persistedAvatarUrl = nextAvatarUrl ?? avatarUrl;
+    const payload = {
+      ...form,
+      bio: form.bio?.trim() ? form.bio.trim() : undefined,
+      avatarUrl: persistedAvatarUrl || undefined,
+    };
+
+    const updated = await updateProfile.mutateAsync(payload);
+    updateUser(updated);
+    return updated;
+  };
+
   const saveProfile = async (event: FormEvent) => {
     event.preventDefault();
     try {
-      const updated = await updateProfile.mutateAsync({ ...form, bio: form.bio || undefined, avatarUrl: avatarUrl || undefined });
-      updateUser(updated);
+      await persistProfile();
       toast.success('Odeeffannoon kee haaromfame.');
     } catch (error: unknown) {
       toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Fooyyeessuu hin dandeenye.');
@@ -42,7 +54,10 @@ export default function DashboardPage() {
   const handleAvatarUpload = async (file: File) => {
     setIsUploadingAvatar(true);
     try {
-      setAvatarUrl(await uploadImage(file, 'avatars'));
+      const uploadedUrl = await uploadImage(file, 'avatars');
+      setAvatarUrl(uploadedUrl);
+      updateUser({ avatarUrl: uploadedUrl });
+      await persistProfile(uploadedUrl);
       toast.success('Suuraan kee olkaa\'ame');
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Suuraa olkaa\'uu hin dandeenye');

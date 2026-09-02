@@ -327,7 +327,8 @@ export default function ArticleCard({
                   background: `linear-gradient(135deg, ${categoryColor} 0%, #111827 100%)`,
                 }}
               >
-                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute inset-0 bg-black/10" />Not connected. Connecting in 1s…
+
 
                 <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/20 bg-white/10 text-5xl shadow-2xl backdrop-blur-md">
                   {getCategoryIcon(article.category)}
