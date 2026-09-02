@@ -319,7 +319,7 @@ export default function ArticleCard({
                 src={article.coverImageUrl}
                 alt={article.title}
                 className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
-              />
+              />  
             ) : (
               <div
                 className="relative flex h-full w-full items-center justify-center overflow-hidden"

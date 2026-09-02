@@ -51,7 +51,7 @@ export default function HomePage() {
         }}
       >
         {/* Left Sidebar */}
-        <div className="min-h-0">
+        <div className="min-h-0 h-full">
           <LeftSidebar />
         </div>
 
@@ -216,7 +216,7 @@ export default function HomePage() {
         </main>
 
         {/* Right Sidebar */}
-        <div className="min-h-0">
+        <div className="min-h-0 h-full">
           <RightSidebar />
         </div>
       </div>

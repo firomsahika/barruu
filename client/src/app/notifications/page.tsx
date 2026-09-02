@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { useAuthStore } from '@/store/authStore';
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from '@/hooks/useUserActions';
@@ -9,12 +11,19 @@ import { formatRelativeDate } from '@/types';
 interface NotificationItem { id: string; message: string; link?: string; isRead: boolean; createdAt: string; actor?: { name: string } }
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const { user, isInitialized } = useAuthStore();
   const { data: notifications = [], isLoading } = useNotifications() as { data?: NotificationItem[]; isLoading: boolean };
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
 
-  if (!isInitialized || !user) return <><Header /><p className="mx-auto max-w-3xl px-4 py-16 text-center text-gray-600">Beeksisa ilaaluuf seeni.</p></>;
+  useEffect(() => {
+    if (!isInitialized) return;
+    if (!user) router.replace('/login');
+  }, [isInitialized, user, router]);
+
+  if (!isInitialized) return <><Header /><p className="mx-auto max-w-3xl px-4 py-16 text-center text-gray-600">Sessionii ni eegama...</p></>;
+  if (!user) return <><Header /><p className="mx-auto max-w-3xl px-4 py-16 text-center text-gray-600">Beeksisa ilaaluuf seeni.</p></>;
 
   return (
     <><Header /><main className="mx-auto max-w-3xl px-4 py-8">

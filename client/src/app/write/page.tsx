@@ -508,10 +508,11 @@ export default function WritePage() {
   /* Loading                                                                   */
   /* ========================================================================= */
 
-  if (
-    !isInitialized ||
-    !user
-  ) {
+  if (!isInitialized) {
+    return null;
+  }
+
+  if (!user) {
     return null;
   }
 

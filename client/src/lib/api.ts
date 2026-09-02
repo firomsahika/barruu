@@ -30,16 +30,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 unauthorized
+// Leave session clearing to the auth flow so refreshes and transient 401s do not log users out unexpectedly.
 api.interceptors.response.use(
   (res) => res,
-  (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('sb_token');
-      localStorage.removeItem('sb_user');
-    }
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;

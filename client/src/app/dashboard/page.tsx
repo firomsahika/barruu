@@ -21,11 +21,15 @@ export default function DashboardPage() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   useEffect(() => {
-    if (isInitialized && !user) router.replace('/login');
-    if (user) {
-      setForm({ name: user.name, username: user.username, email: user.email, bio: user.bio || '' });
-      setAvatarUrl(user.avatarUrl || '');
+    if (!isInitialized) return;
+
+    if (!user) {
+      router.replace('/login');
+      return;
     }
+
+    setForm({ name: user.name, username: user.username, email: user.email, bio: user.bio || '' });
+    setAvatarUrl(user.avatarUrl || '');
   }, [isInitialized, user, router]);
 
   const persistProfile = async (nextAvatarUrl?: string) => {
@@ -66,7 +70,8 @@ export default function DashboardPage() {
     }
   };
 
-  if (!isInitialized || !user) return null;
+  if (!isInitialized) return null;
+  if (!user) return null;
 
   return <><Header /><main className="mx-auto max-w-4xl px-4 py-8"><h1 className="mb-8 text-xl font-bold text-gray-900">Dashboard</h1>
     <section className="mb-8 rounded-md border border-gray-200 bg-white p-6"><h2 className="mb-4 text-base font-bold text-gray-900">Profile kee gulaali</h2><form onSubmit={saveProfile} className="grid gap-4 sm:grid-cols-2">

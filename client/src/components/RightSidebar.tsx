@@ -15,9 +15,10 @@ export default function RightSidebar() {
   }, []);
 
   return (
-    <aside>
-      {/* Trending section */}
-      <div className="mb-4 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+    <aside className="h-full w-full">
+      <div className="sticky top-20 h-[calc(100vh-96px)] overflow-y-auto pr-1 pb-4">
+        {/* Trending section */}
+        <div className="mb-4 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         <div className="border-b border-gray-200 bg-slate-50 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-500">
           Filatamoo har&apos;aa
         </div>
@@ -91,6 +92,7 @@ export default function RightSidebar() {
             <div className="mt-0.5 text-[12px] text-gray-400">{cat.desc}</div>
           </Link>
         ))}
+        </div>
       </div>
     </aside>
   );

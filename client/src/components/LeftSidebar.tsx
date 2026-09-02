@@ -149,8 +149,8 @@ export default function LeftSidebar() {
   };
 
   return (
-    <aside className="w-full">
-      <div className="sticky top-20">
+    <aside className="h-full w-full">
+      <div className="sticky top-20 h-[calc(100vh-96px)] overflow-y-auto pr-1 pb-4">
         <div className="rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-sm shadow-slate-200/30">
           {/* ============================================================ */}
           {/* Main navigation                                               */}
