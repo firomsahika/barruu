@@ -332,19 +332,33 @@ For detailed endpoint payloads, query parameters, status codes, and error repres
 
 ## 🚀 Getting Started & Local Setup
 
-### Prerequisites
-- **Node.js**: v18.0.0 or later (v20+ recommended)
+### Option A: Quickstart with Docker Compose (Recommended)
+You can launch the entire stack (PostgreSQL database, Express API server, and Next.js frontend) with a single command:
+
+```bash
+docker compose up --build
+```
+- **Client Application**: [http://localhost:3000](http://localhost:3000)
+- **API Server & Health**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
+- **PostgreSQL Database**: `localhost:5432`
+
+---
+
+### Option B: Manual Host Setup
+
+#### Prerequisites
+- **Node.js**: v18.0.0 or later (v20+ or v22+ recommended)
 - **npm**: v9.0.0 or later
 - **PostgreSQL**: v14.0 or later (or cloud PostgreSQL such as Neon, Supabase)
 
-### 1. Clone the Repository
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/firomsahika/barruu.git
 cd barruu
 ```
 
-### 2. Environment Variables Setup
-Copy the environment template files for both environments:
+#### 2. Environment Variables Setup
+Copy the environment template files:
 ```bash
 # Server environment
 cp server/.env.example server/.env
@@ -354,7 +368,7 @@ cp client/.env.example client/.env.local
 ```
 Update `DATABASE_URL` and `JWT_SECRET` in `server/.env`.
 
-### 3. Install Dependencies
+#### 3. Install Dependencies
 ```bash
 # Install server dependencies
 npm --prefix server install
@@ -363,7 +377,7 @@ npm --prefix server install
 npm --prefix client install
 ```
 
-### 4. Database Migration & Schema Generation
+#### 4. Database Migration & Schema Generation
 ```bash
 # Generate Prisma Client
 npm run prisma:generate
@@ -372,7 +386,7 @@ npm run prisma:generate
 npm run prisma:migrate
 ```
 
-### 5. Run Development Servers
+#### 5. Run Development Servers
 Start both servers concurrently:
 ```bash
 # Terminal 1: Backend API (runs on port 5000)
@@ -395,6 +409,9 @@ Visit `http://localhost:3000` in your browser.
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/barruu` |
 | `JWT_SECRET` | Secret key used for signing and verifying JWT tokens | `your_secure_random_jwt_secret` |
 | `CLIENT_URL` | Allowed CORS origins (comma-separated for multiples) | `http://localhost:3000` |
+| `LOG_LEVEL` | Pino logging level (`debug`, `info`, `warn`, `error`) | `info` |
+| `PASSWORD_RESET_WEBHOOK_URL` | Optional outbound webhook endpoint for password reset links | `https://example.com/api/webhooks/reset` |
+| `PASSWORD_RESET_WEBHOOK_SECRET` | Bearer token / secret for authenticating password reset webhooks | `your_secure_webhook_secret` |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary storage cloud identifier | `your_cloud_name` |
 | `CLOUDINARY_API_KEY` | Cloudinary API Key | `your_api_key` |
 | `CLOUDINARY_API_SECRET` | Cloudinary API Secret | `your_api_secret` |
