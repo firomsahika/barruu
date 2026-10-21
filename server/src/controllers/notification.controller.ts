@@ -2,6 +2,17 @@ import { Request, Response } from 'express';
 import { NotificationService } from '../services/notification.service';
 
 export class NotificationController {
+  static async getUnreadCount(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      const count = await NotificationService.getUnreadCount(userId);
+      res.json({ count });
+    } catch (error: any) {
+      console.error('Get unread notifications count error:', error);
+      res.status(500).json({ error: 'Dogoggora serverii' });
+    }
+  }
+
   static async getNotifications(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user?.id;

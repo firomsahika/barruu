@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { NotificationService } from './notification.service';
 import slugify from 'slug';
 import { z } from 'zod';
 import { createArticleSchema, updateArticleSchema } from '../validations/article.validation';
@@ -6,7 +7,9 @@ import { createArticleSchema, updateArticleSchema } from '../validations/article
 export class ArticleService {
   static calculateReadingTime(content: string): number {
     const wordsPerMinute = 100;
-    const wordCount = content.split(/\\s+/).length;
+    const trimmed = content.trim();
+    if (!trimmed) return 1;
+    const wordCount = trimmed.split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
   }
 
@@ -365,6 +368,14 @@ export class ArticleService {
         },
       });
 
+      await NotificationService.createNotification({
+        userId: article.authorId,
+        actorId: userId,
+        type,
+        message: type === 'LIKE' ? 'liked your article.' : 'reacted to your article.',
+        link: `/article/${article.slug}`,
+      });
+
       return { action: 'ADDED', reaction: newReaction };
     }
   }
@@ -386,7 +397,7 @@ export class ArticleService {
     // 2. Verify article exists
     const articleExists = await prisma.article.findUnique({
       where: { id: articleId },
-      select: { id: true },
+      select: { id: true, authorId: true, slug: true },
     });
 
     if (!articleExists) {
@@ -406,7 +417,7 @@ export class ArticleService {
     }
 
     // 4. Create comment using correct foreign keys matching your model
-    return prisma.comment.create({
+    const comment = await prisma.comment.create({
       data: {
         content: trimmedContent,
         articleId,
@@ -429,6 +440,16 @@ export class ArticleService {
         },
       },
     });
+
+    await NotificationService.createNotification({
+      userId: articleExists.authorId,
+      actorId: userId,
+      type: 'COMMENT',
+      message: 'commented on your article.',
+      link: `/article/${articleExists.slug}#comments`,
+    });
+
+    return comment;
   }
 
   // get All comments

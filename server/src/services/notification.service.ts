@@ -1,5 +1,5 @@
 import { prisma } from '../lib/prisma';
-import { io } from '../index';
+import { getSocketIO } from '../lib/socket';
 import { NotificationType } from '@prisma/client';
 
 export class NotificationService {
@@ -33,7 +33,10 @@ export class NotificationService {
     });
 
     // Emit real-time event to the specific user's room
-    io.to(userId).emit('new_notification', notification);
+    const io = getSocketIO();
+    if (io) {
+      io.to(userId).emit('new_notification', notification);
+    }
 
     return notification;
   }
@@ -46,6 +49,12 @@ export class NotificationService {
       include: {
         actor: { select: { id: true, name: true, username: true, avatarUrl: true } }
       }
+    });
+  }
+
+  static async getUnreadCount(userId: string) {
+    return prisma.notification.count({
+      where: { userId, isRead: false },
     });
   }
 

@@ -7,6 +7,7 @@ const router = Router();
 // All routes require authentication
 router.use(authenticate);
 
+router.get('/unread-count', NotificationController.getUnreadCount);
 router.get('/', NotificationController.getNotifications);
 router.patch('/mark-all-read', NotificationController.markAllAsRead);
 router.patch('/:id/read', NotificationController.markAsRead);

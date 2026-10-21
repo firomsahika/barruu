@@ -4,7 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell, Menu, X, PenLine, Home, Newspaper, MessageCircle, Landmark, BookOpen, ScrollText, Library, Wheat, Mic2 } from 'lucide-react';
+import { io } from 'socket.io-client';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
+import { useUnreadNotificationCount } from '@/hooks/useUserActions';
 import { getAvatarUrl } from '@/types';
 import SearchInput from '@/components/Search';
 
@@ -14,6 +17,9 @@ export default function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const { data: unreadData } = useUnreadNotificationCount(Boolean(user));
+  const unreadCount = unreadData?.count ?? 0;
 
   useEffect(() => {
     if (!isInitialized) initialize();
@@ -28,6 +34,19 @@ export default function Header() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const socket = io(apiUrl.replace(/\/api\/?$/, ''));
+    socket.emit('join', user.id);
+    socket.on('new_notification', () => {
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [queryClient, user]);
 
   return (
     <header className="site-header sticky top-0 z-50 border-b border-gray-200 bg-white/95 font-sans text-gray-900 backdrop-blur">
@@ -68,8 +87,9 @@ export default function Header() {
             <span className="hidden sm:inline">Barreessi</span>
           </Link>
 
-          <Link href="/notifications" aria-label="Beeksisa" className="w-9 h-9 border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+          <Link href="/notifications" aria-label={`Beeksisa${unreadCount ? `, ${unreadCount} unread` : ''}`} className="relative flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 transition-colors hover:bg-gray-100">
             <Bell size={18} className="text-gray-600" strokeWidth={1.5} />
+            {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>}
           </Link>
 
           {/* User Avatar Menu */}
@@ -139,7 +159,7 @@ export default function Header() {
             href="/register"
             className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-xs font-bold whitespace-nowrap transition-colors"
           >
-            Galmaa'i
+            Galmaa&apos;i
           </Link>
         </div>
       )}

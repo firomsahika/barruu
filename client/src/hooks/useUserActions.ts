@@ -69,6 +69,15 @@ export function useNotifications() {
   });
 }
 
+export function useUnreadNotificationCount(enabled = true) {
+  return useQuery<{ count: number }>({
+    queryKey: ['notifications', 'unread-count'],
+    queryFn: async () => (await api.get('/notifications/unread-count')).data,
+    enabled,
+    refetchInterval: 30_000,
+  });
+}
+
 export function useMarkNotificationRead() {
   const queryClient = useQueryClient();
   return useMutation({

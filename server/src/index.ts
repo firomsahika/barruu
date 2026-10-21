@@ -26,6 +26,8 @@ if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
 
 const server = http.createServer(app);
 
+import { setSocketIO } from './lib/socket';
+
 export const io = new Server(server, {
   cors: {
     origin: clientOrigins,
@@ -33,6 +35,8 @@ export const io = new Server(server, {
     credentials: true,
   },
 });
+
+setSocketIO(io);
 
 io.on('connection', (socket) => {
   // Client should emit 'join' with their user ID when they connect

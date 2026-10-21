@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import { updateProfileSchema } from '../validations/auth.validation';
+import { NotificationService } from '../services/notification.service';
 
 export class UserController {
 
@@ -82,6 +83,13 @@ export class UserController {
             }
 
             await UserService.followUser(followerId, followeeId);
+            await NotificationService.createNotification({
+                userId: followeeId,
+                actorId: followerId,
+                type: 'FOLLOW',
+                message: 'started following you.',
+                link: `/user/${(req as any).user?.username}`,
+            });
 
             res.status(200).json({
                 message: 'You are now following this user'

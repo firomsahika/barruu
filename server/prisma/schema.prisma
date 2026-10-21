@@ -163,6 +163,7 @@ enum NotificationType {
   LIKE
   UNICORN
   COMMENT
+  FOLLOW
   SYSTEM
 }
 
