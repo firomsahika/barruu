@@ -1,0 +1,16 @@
+{
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "rules": {
+    "max-lines": [
+      "warn",
+      {
+        "max": 500,
+        "skipBlankLines": true,
+        "skipComments": true
+      }
+    ]
+  }
+}

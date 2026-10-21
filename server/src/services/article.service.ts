@@ -1,8 +1,32 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import { AppError } from '../lib/errors';
 import { NotificationService } from './notification.service';
 import slugify from 'slug';
 import { z } from 'zod';
 import { createArticleSchema, updateArticleSchema } from '../validations/article.validation';
+
+export interface GetArticlesQuery {
+  page?: string;
+  limit?: string;
+  category?: string;
+  tag?: string;
+  sort?: 'latest' | 'top' | 'relevant' | string;
+  search?: string;
+  author?: string;
+  featured?: string;
+}
+
+const AUTHOR_SELECT = { id: true, name: true, username: true, avatarUrl: true } as const;
+const COMMENT_INCLUDE = {
+  author: { select: AUTHOR_SELECT },
+  _count: { select: { replies: true } },
+} as const;
+const ARTICLE_CARD_INCLUDE = {
+  author: { select: AUTHOR_SELECT },
+  tags: { include: { tag: true } },
+  _count: { select: { reactions: true, comments: true } },
+} as const;
 
 export class ArticleService {
   static calculateReadingTime(content: string): number {
@@ -13,7 +37,7 @@ export class ArticleService {
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
   }
 
-  static async getArticles(query: any, userId?: string) {
+  static async getArticles(query: GetArticlesQuery, userId?: string) {
     const {
       page = '1',
       limit = '10',
@@ -25,13 +49,13 @@ export class ArticleService {
       featured,
     } = query;
 
-    const pageNum = parseInt(page as string);
-    const limitNum = parseInt(limit as string);
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 10;
     const skip = (pageNum - 1) * limitNum;
 
-    const where: any = { published: true };
+    const where: Prisma.ArticleWhereInput = { published: true };
 
-    if (category) where.category = category as string;
+    if (category) where.category = category as any;
     if (featured === 'true') where.featured = true;
     if (author) where.author = { username: author };
 
@@ -47,7 +71,7 @@ export class ArticleService {
       ];
     }
 
-    let orderBy: any = { createdAt: 'desc' };
+    let orderBy: Prisma.ArticleOrderByWithRelationInput | Prisma.ArticleOrderByWithRelationInput[] = { createdAt: 'desc' };
     if (sort === 'top') {
       orderBy = { reactions: { _count: 'desc' } };
     } else if (sort === 'relevant') {
@@ -67,37 +91,35 @@ export class ArticleService {
             where: { parentId: null },
             take: 2,
             orderBy: { createdAt: 'desc' },
-            include: {
-              author: { select: { id: true, name: true, username: true, avatarUrl: true } },
-            },
+            include: { author: { select: { id: true, name: true, username: true, avatarUrl: true } } },
           },
           reactions: { select: { type: true } },
-          _count: { select: { reactions: true, comments: true, bookmarks: true } }
-        }
+          _count: { select: { reactions: true, comments: true, bookmarks: true } },
+        },
       }),
-      prisma.article.count({ where })
+      prisma.article.count({ where }),
     ]);
 
-    let articlesWithStatus = articles.map(a => ({
+    let articlesWithStatus = articles.map((a) => ({
       ...a,
       reactionCounts: {
-        likes: a.reactions.filter(r => r.type === 'LIKE').length,
-        unicorns: a.reactions.filter(r => r.type === 'UNICORN').length,
+        likes: a.reactions.filter((r) => r.type === 'LIKE').length,
+        unicorns: a.reactions.filter((r) => r.type === 'UNICORN').length,
       },
     }));
 
     if (userId) {
       const reactionData = await prisma.reaction.findMany({
-        where: { userId, articleId: { in: articles.map(a => a.id) } }
+        where: { userId, articleId: { in: articles.map((a) => a.id) } },
       });
       const bookmarkData = await prisma.bookmark.findMany({
-        where: { userId, articleId: { in: articles.map(a => a.id) } }
+        where: { userId, articleId: { in: articles.map((a) => a.id) } },
       });
 
-      const reactionMap = new Map(reactionData.map(r => [`${r.articleId}-${r.type}`, true]));
-      const bookmarkSet = new Set(bookmarkData.map(b => b.articleId));
+      const reactionMap = new Map(reactionData.map((r) => [`${r.articleId}-${r.type}`, true]));
+      const bookmarkSet = new Set(bookmarkData.map((b) => b.articleId));
 
-      articlesWithStatus = articlesWithStatus.map(a => ({
+      articlesWithStatus = articlesWithStatus.map((a) => ({
         ...a,
         userReactions: {
           liked: reactionMap.has(`${a.id}-LIKE`),
@@ -123,30 +145,29 @@ export class ArticleService {
       where: { slug },
       include: {
         author: {
-          select: {
-            id: true, name: true, username: true, avatarUrl: true, bio: true, createdAt: true,
-            _count: { select: { articles: true } }
-          }
+          select: { ...AUTHOR_SELECT, bio: true, createdAt: true, _count: { select: { articles: true } } },
         },
         tags: { include: { tag: true } },
         comments: {
           where: { parentId: null },
           include: {
-            author: { select: { id: true, name: true, username: true, avatarUrl: true } },
+            author: { select: AUTHOR_SELECT },
             replies: {
-              include: { author: { select: { id: true, name: true, username: true, avatarUrl: true } } },
-              orderBy: { createdAt: 'asc' }
-            }
+              include: { author: { select: AUTHOR_SELECT } },
+              orderBy: { createdAt: 'asc' },
+            },
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
         },
         _count: { select: { reactions: true, comments: true, bookmarks: true } },
-        reactions: { select: { type: true, userId: true } }
-      }
+        reactions: { select: { type: true, userId: true } },
+      },
     });
 
-    if (!article) throw new Error('Barruu hin argamne');
-    if (!article.published && article.authorId !== userId) throw new Error('Barruu kana ilaalu hin dandeeysuu');
+    if (!article) throw AppError.notFound('Barruu hin argamne', 'ARTICLE_NOT_FOUND');
+    if (!article.published && article.authorId !== userId) {
+      throw AppError.forbidden('Barruu kana ilaalu hin dandeeysuu', 'FORBIDDEN');
+    }
 
     await prisma.article.update({
       where: { id: article.id },
@@ -181,7 +202,9 @@ export class ArticleService {
       select: { slug: true, authorId: true },
     });
 
-    if (!article || article.authorId !== userId) throw new Error('ARTICLE_NOT_FOUND');
+    if (!article || article.authorId !== userId) {
+      throw AppError.notFound('Barruu hin argamne', 'ARTICLE_NOT_FOUND');
+    }
     return this.getArticleBySlug(article.slug, userId);
   }
 
@@ -224,11 +247,7 @@ export class ArticleService {
           )
         } : undefined,
       },
-      include: {
-        author: { select: { id: true, name: true, username: true, avatarUrl: true } },
-        tags: { include: { tag: true } },
-        _count: { select: { reactions: true, comments: true } }
-      }
+      include: ARTICLE_CARD_INCLUDE,
     });
   }
 
@@ -239,11 +258,11 @@ export class ArticleService {
     });
 
     if (!existingArticle) {
-      throw new Error('ARTICLE_NOT_FOUND');
+      throw AppError.notFound('Barruu hin argamne', 'ARTICLE_NOT_FOUND');
     }
 
     if (existingArticle.authorId !== userId) {
-      throw new Error('UNAUTHORIZED');
+      throw AppError.unauthorized('Aangoo hin qabdan', 'UNAUTHORIZED');
     }
 
     // 2. Destructure optional update fields
@@ -300,11 +319,7 @@ export class ArticleService {
         ...(featured !== undefined && { featured: Boolean(featured) }),
         ...(tagsUpdate && { tags: tagsUpdate }),
       },
-      include: {
-        author: { select: { id: true, name: true, username: true, avatarUrl: true } },
-        tags: { include: { tag: true } },
-        _count: { select: { reactions: true, comments: true } },
-      },
+      include: ARTICLE_CARD_INCLUDE,
     });
   }
 
@@ -314,11 +329,11 @@ export class ArticleService {
     });
 
     if (!article) {
-      throw new Error('ARTICLE_NOT_FOUND');
+      throw AppError.notFound('Barruu hin argamne', 'ARTICLE_NOT_FOUND');
     }
 
     if (article.authorId !== userId) {
-      throw new Error('UNAUTHORIZED');
+      throw AppError.unauthorized('Aangoo hin qabdan', 'UNAUTHORIZED');
     }
 
     return prisma.article.delete({
@@ -327,57 +342,34 @@ export class ArticleService {
   }
 
   // react to article like or unicorn
-  static async reactArticle(
-    articleId: string,
-    userId: string,
-    type: 'LIKE' | 'UNICORN'
-  ) {
-    // 1. Ensure article exists
-    const article = await prisma.article.findUnique({
-      where: { id: articleId },
-    });
-
+  static async reactArticle(articleId: string, userId: string, type: 'LIKE' | 'UNICORN') {
+    const article = await prisma.article.findUnique({ where: { id: articleId } });
     if (!article) {
-      throw new Error('ARTICLE_NOT_FOUND');
+      throw AppError.notFound('Barruu hin argamne', 'ARTICLE_NOT_FOUND');
     }
 
-    // 2. Check if reaction already exists
     const existingReaction = await prisma.reaction.findUnique({
-      where: {
-        userId_articleId_type: {
-          userId,
-          articleId,
-          type,
-        },
-      },
+      where: { userId_articleId_type: { userId, articleId, type } },
     });
 
-    // 3. Toggle: Delete if it exists, Create if it doesn't
     if (existingReaction) {
-      await prisma.reaction.delete({
-        where: { id: existingReaction.id },
-      });
-
+      await prisma.reaction.delete({ where: { id: existingReaction.id } });
       return { action: 'REMOVED', type };
-    } else {
-      const newReaction = await prisma.reaction.create({
-        data: {
-          userId,
-          articleId,
-          type,
-        },
-      });
-
-      await NotificationService.createNotification({
-        userId: article.authorId,
-        actorId: userId,
-        type,
-        message: type === 'LIKE' ? 'liked your article.' : 'reacted to your article.',
-        link: `/article/${article.slug}`,
-      });
-
-      return { action: 'ADDED', reaction: newReaction };
     }
+
+    const newReaction = await prisma.reaction.create({
+      data: { userId, articleId, type },
+    });
+
+    await NotificationService.createNotification({
+      userId: article.authorId,
+      actorId: userId,
+      type,
+      message: type === 'LIKE' ? 'liked your article.' : 'reacted to your article.',
+      link: `/article/${article.slug}`,
+    });
+
+    return { action: 'ADDED', reaction: newReaction };
   }
 
   // comment article 
@@ -391,7 +383,7 @@ export class ArticleService {
     // 1. Input sanitization
     const trimmedContent = content?.trim();
     if (!trimmedContent) {
-      throw new Error('INVALID_COMMENT_CONTENT');
+      throw AppError.badRequest('Yaadni qulqulluu ta\'uu qaba', 'INVALID_COMMENT_CONTENT');
     }
 
     // 2. Verify article exists
@@ -401,7 +393,7 @@ export class ArticleService {
     });
 
     if (!articleExists) {
-      throw new Error('ARTICLE_NOT_FOUND');
+      throw AppError.notFound('Barruu hin argamne', 'ARTICLE_NOT_FOUND');
     }
 
     // 3. If it's a reply, verify parent comment exists and belongs to the same article
@@ -412,33 +404,18 @@ export class ArticleService {
       });
 
       if (!parentComment || parentComment.articleId !== articleId) {
-        throw new Error('PARENT_COMMENT_NOT_FOUND');
+        throw AppError.notFound('Yaadni jalqabaa hin argamne', 'PARENT_COMMENT_NOT_FOUND');
       }
     }
 
-    // 4. Create comment using correct foreign keys matching your model
     const comment = await prisma.comment.create({
       data: {
         content: trimmedContent,
         articleId,
-        authorId: userId, // Matches 'authorId' in your Comment model
+        authorId: userId,
         parentId: parentId || null,
       },
-      include: {
-        author: { // Matches 'author' relation in your Comment model
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            avatarUrl: true,
-          },
-        },
-        _count: {
-          select: {
-            replies: true,
-          },
-        },
-      },
+      include: COMMENT_INCLUDE,
     });
 
     await NotificationService.createNotification({
@@ -456,23 +433,9 @@ export class ArticleService {
   static async getAllComments(articleId: string) {
     return prisma.comment.findMany({
       where: { articleId },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            avatarUrl: true,
-          },
-        },
-        _count: {
-          select: {
-            replies: true,
-          },
-        },
-      },
+      include: COMMENT_INCLUDE,
     });
-}
+  }
 
  // delete comment by comment Id
   static async deleteComment(commentId: string, userId: string) {
@@ -481,11 +444,11 @@ export class ArticleService {
     });
 
     if (!comment) {
-      throw new Error('COMMENT_NOT_FOUND');
+      throw AppError.notFound('Yaadni hin argamne', 'COMMENT_NOT_FOUND');
     }
 
-    if(comment.authorId !== userId){
-      throw new Error('UNAUTHORIZED');
+    if (comment.authorId !== userId) {
+      throw AppError.unauthorized('Aangoo hin qabdan', 'UNAUTHORIZED');
     }
 
     return prisma.comment.delete({
@@ -498,23 +461,9 @@ export class ArticleService {
   static async getReplies(commentId: string) {
     return prisma.comment.findMany({
       where: { parentId: commentId },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            avatarUrl: true,
-          },
-        },
-        _count: {
-          select: {
-            replies: true,
-          },
-        },
-      },
+      include: COMMENT_INCLUDE,
     });
-} 
+  } 
 
   // deleteReply
   static async deleteReply(replyId: string, userId: string){
@@ -523,42 +472,17 @@ export class ArticleService {
     });
 
     if (!reply) {
-      throw new Error('REPLY_NOT_FOUND');
+      throw AppError.notFound('Deebiin hin argamne', 'REPLY_NOT_FOUND');
     }
 
-    if(reply.authorId !== userId){
-      throw new Error('UNAUTHORIZED');
+    if (reply.authorId !== userId) {
+      throw AppError.unauthorized('Aangoo hin qabdan', 'UNAUTHORIZED');
     }
 
     return prisma.comment.delete({
       where: { id: replyId },
     }); 
   }
-
-  // like comment
-  // static async likeComment(commentId: string, userId: string) {
-  //   return prisma.comment.update({
-  //     where: { id: commentId },
-  //     data: {
-  //       likes: {
-  //         connect: { id: userId },
-  //       },
-  //     },
-  //   });
-  // }
-
-  // unlike comment
-  // static async unlikeComment(commentId: string, userId: string) {
-  //   return prisma.comment.update({
-  //     where: { id: commentId },
-  //     data: {
-  //       likes: {
-  //         disconnect: { id: userId },
-  //       },
-  //     },
-  //   });
-  // }
-
 }
 
 

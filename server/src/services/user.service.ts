@@ -1,35 +1,9 @@
 import { prisma } from '../lib/prisma';
 import { updateProfileSchema } from '../validations/auth.validation';
+import { AppError } from '../lib/errors';
 import { z } from 'zod';
 
 export class UserService {
-  // static async getOtherProfile(userId: string) {
-  //     const user = await prisma.user.findUnique({
-  //         where: { id: userId },
-  //         select: {
-  //             id: true,
-  //             email: true,
-  //             username: true,
-  //             name: true,
-  //             role: true,
-  //             avatarUrl: true,
-  //             bio: true,
-  //             createdAt: true,
-  //             _count: {
-  //                 select: {
-  //                     articles: true,
-  //                     comments: true,
-  //                 }
-  //             }
-  //         }
-  //     });
-
-  //     if (!user) {
-  //         throw new Error('Fayyadamaan hin argamne');
-  //     }
-  //     return user;
-  // }
-
   static async getUserProfile(username: string) {
     const user = await prisma.user.findUnique({
       where: { username },
@@ -45,7 +19,7 @@ export class UserService {
           select: {
             articles: { where: { published: true } },
             comments: true,
-          }
+          },
         },
         articles: {
           where: { published: true },
@@ -53,41 +27,37 @@ export class UserService {
           include: {
             author: { select: { id: true, name: true, username: true, avatarUrl: true } },
             tags: { include: { tag: true } },
-            _count: { select: { reactions: true, comments: true } }
-          }
-        }
-      }
+            _count: { select: { reactions: true, comments: true } },
+          },
+        },
+      },
     });
 
     if (!user) {
-      throw new Error('Fayyadamaan hin argamne');
+      throw AppError.notFound('Fayyadamaan hin argamne', 'USER_NOT_FOUND');
     }
 
-    // Calculate total reactions for user's articles
     const totalReactions = await prisma.reaction.count({
-      where: { article: { authorId: user.id } }
+      where: { article: { authorId: user.id } },
     });
 
     return { ...user, totalReactions };
   }
 
   static async followUser(followerId: string, followeeId: string) {
-    // 1. Prevent self-following
     if (followerId === followeeId) {
-      throw new Error('CANNOT_FOLLOW_SELF');
+      throw AppError.badRequest('Of hordofuu hin dandeessan', 'CANNOT_FOLLOW_SELF');
     }
 
-    // 2. Check if the user to follow actually exists
     const followeeExists = await prisma.user.findUnique({
       where: { id: followeeId },
       select: { id: true },
     });
 
     if (!followeeExists) {
-      throw new Error('USER_NOT_FOUND');
+      throw AppError.notFound('Fayyadamaan hordofamu hin argamne', 'USER_NOT_FOUND');
     }
 
-    // 3. Create follow relationship (ignore if already following)
     try {
       const follow = await prisma.follow.create({
         data: {
@@ -98,9 +68,8 @@ export class UserService {
 
       return follow;
     } catch (error: any) {
-      // Prisma error code for unique constraint violation (already following)
-      if (error.code === 'P2002') {
-        throw new Error('ALREADY_FOLLOWING');
+      if (error?.code === 'P2002') {
+        throw AppError.conflict('Duraanuu hordoftaniittu', 'ALREADY_FOLLOWING');
       }
       throw error;
     }
@@ -108,7 +77,7 @@ export class UserService {
 
   static async unfollowUser(followerId: string, followeeId: string) {
     if (followerId === followeeId) {
-      throw new Error('CANNOT_UNFOLLOW_SELF');
+      throw AppError.badRequest('Of hordofuu dhiisuu hin dandeessan', 'CANNOT_UNFOLLOW_SELF');
     }
 
     try {
@@ -123,26 +92,23 @@ export class UserService {
 
       return unfollow;
     } catch (error: any) {
-      // Prisma error code for record to delete not found
-      if (error.code === 'P2025') {
-        throw new Error('NOT_FOLLOWING');
+      if (error?.code === 'P2025') {
+        throw AppError.badRequest('Hordofaa hin jirtan', 'NOT_FOLLOWING');
       }
       throw error;
     }
   }
 
   static async getFollowers(userId: string) {
-    // Check if user exists
     const userExists = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true },
     });
 
     if (!userExists) {
-      throw new Error('USER_NOT_FOUND');
+      throw AppError.notFound('Fayyadamaan hin argamne', 'USER_NOT_FOUND');
     }
 
-    // Get all users who follow the given userId
     const followers = await prisma.follow.findMany({
       where: { followeeId: userId },
       select: {
@@ -162,7 +128,6 @@ export class UserService {
       },
     });
 
-    // Map response to return flat follower objects with follow date
     return followers.map((f) => ({
       ...f.follower,
       followedAt: f.createdAt,
@@ -176,10 +141,9 @@ export class UserService {
     });
 
     if (!userExists) {
-      throw new Error('USER_NOT_FOUND');
+      throw AppError.notFound('Fayyadamaan hin argamne', 'USER_NOT_FOUND');
     }
 
-    // Get all users who are followed by the given userId
     const following = await prisma.follow.findMany({
       where: { followerId: userId },
       select: {
@@ -199,7 +163,6 @@ export class UserService {
       },
     });
 
-    // Map response to return flat user objects with follow date
     return following.map((f) => ({
       ...f.followee,
       followedAt: f.createdAt,
@@ -222,13 +185,13 @@ export class UserService {
           select: {
             articles: true,
             comments: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (!user) {
-      throw new Error('Fayyadamaan hin argamne');
+      throw AppError.notFound('Fayyadamaan hin argamne', 'USER_NOT_FOUND');
     }
     return user;
   }
@@ -245,11 +208,11 @@ export class UserService {
         avatarUrl: true,
         bio: true,
         createdAt: true,
-      }
+      },
     });
 
     if (!existingUser) {
-      throw new Error('Fayyadamaan hin argamne');
+      throw AppError.notFound('Fayyadamaan hin argamne', 'USER_NOT_FOUND');
     }
 
     const normalizedData = {
@@ -270,33 +233,32 @@ export class UserService {
         avatarUrl: true,
         bio: true,
         createdAt: true,
-      }
+      },
     });
     return updatedUser;
   }
 
   static async getUserBookmarks(userId: string) {
-
     const existingUser = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!existingUser) {
-      throw new Error('Fayyadamaan hin argamne');
+      throw AppError.notFound('Fayyadamaan hin argamne', 'USER_NOT_FOUND');
     }
 
     const bookmarks = await prisma.bookmark.findMany({
-      where: { userId: userId },
+      where: { userId },
       include: {
         article: {
           include: {
             author: { select: { id: true, name: true, username: true, avatarUrl: true } },
             tags: { include: { tag: true } },
-            _count: { select: { reactions: true, comments: true } }
-          }
-        }
+            _count: { select: { reactions: true, comments: true } },
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return bookmarks;
@@ -304,23 +266,21 @@ export class UserService {
 
   static async getUserDraft(userId: string) {
     const existingUser = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!existingUser) {
-      throw new Error('Fayyadamaan hin argamne');
+      throw AppError.notFound('Fayyadamaan hin argamne', 'USER_NOT_FOUND');
     }
     const drafts = await prisma.article.findMany({
       where: { authorId: userId, published: false },
       include: {
         tags: { include: { tag: true } },
-        _count: { select: { reactions: true, comments: true } }
+        _count: { select: { reactions: true, comments: true } },
       },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
     });
 
     return drafts;
   }
-
-
 }
