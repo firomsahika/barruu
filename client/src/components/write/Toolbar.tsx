@@ -48,7 +48,7 @@ export function ToolbarButton({
 }
 
 export interface ToolbarProps {
-  editor: any;
+  editor: Editor | null;
 }
 
 export function Toolbar({ editor }: ToolbarProps) {

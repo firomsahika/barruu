@@ -48,6 +48,7 @@ function WritePageContent() {
       Image.configure({ inline: false, allowBase64: true }),
       LinkExtension.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: 'Barruukee asitti barreessi...' }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any,
     content: '',
     editorProps: {
