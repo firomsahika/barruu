@@ -61,6 +61,23 @@ app.use((_req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+import { errorHandler } from './middleware/errorHandler';
+import { logger } from './lib/logger';
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    logger.info(`${req.method} ${req.originalUrl || req.url}`, {
+      method: req.method,
+      path: req.originalUrl || req.url,
+      statusCode: res.statusCode,
+      durationMs: Date.now() - start,
+    });
+  });
+  next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
@@ -71,13 +88,19 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/uploads', uploadRoutes);
 
 // Health check
-app.get('/api/health', (req: Request, res: Response) => {
+app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Siidaa Barruu API is running' });
 });
 
-// Start server
-server.listen(PORT, () => {
-  console.log(`🚀 Barruu server running on port ${PORT}`);
-});
+// Centralized error handler
+app.use(errorHandler);
 
+// Start server
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    logger.info(`🚀 Barruu server running on port ${PORT}`);
+  });
+}
+
+export { app, server };
 export default app;
