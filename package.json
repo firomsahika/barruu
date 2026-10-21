@@ -1,0 +1,37 @@
+{
+  "name": "siidaa-barruu-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Siidaa Barruu - Digital Publishing Platform for Afaan Oromo Literature & Creative Writing",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build:server": "npm --prefix server run build",
+    "build:client": "npm --prefix client run build",
+    "build": "npm run build:server && npm run build:client",
+    "lint:server": "npm --prefix server run build",
+    "lint:client": "npm --prefix client run lint",
+    "lint": "npm run lint:client && npm run lint:server",
+    "test:server": "npm --prefix server test",
+    "test:client": "npm --prefix client test",
+    "test": "npm run test:server && npm run test:client",
+    "prisma:generate": "npm --prefix server run prisma:generate",
+    "prisma:migrate": "npm --prefix server run prisma:migrate"
+  },
+  "keywords": [
+    "afaan-oromo",
+    "literature",
+    "publishing",
+    "nextjs",
+    "express",
+    "typescript",
+    "prisma",
+    "full-stack"
+  ],
+  "author": "Firomsa Hika",
+  "license": "MIT"
+}

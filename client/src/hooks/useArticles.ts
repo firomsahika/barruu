@@ -42,7 +42,7 @@ export function useReactToArticle() {
       const { data } = await api.post(`/articles/${id}/react`, { type });
       return data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       // Invalidate both lists and specific article to ensure freshness
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       // We could also do optimistic updates here for true professionalism
@@ -72,7 +72,7 @@ export function useAddComment() {
       const { data } = await api.post(`/articles/${id}/comments`, { content });
       return data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['article'] }); // invalidate all article queries to get new comments
     }
   });

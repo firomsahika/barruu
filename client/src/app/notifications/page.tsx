@@ -28,7 +28,7 @@ export default function NotificationsPage() {
   return (
     <><Header /><main className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between gap-4"><h1 className="text-xs font-bold text-gray-900">Beeksisa</h1><button onClick={() => markAllRead.mutate()} disabled={markAllRead.isPending} className="text-xs font-semibold text-blue-600 disabled:opacity-50">Hundaa dubbifame godhi</button></div>
-      {isLoading && <p className="py-12 text-center text-gray-500">Fe'aa jira...</p>}
+      {isLoading && <p className="py-12 text-center text-gray-500">Fe&apos;aa jira...</p>}
       {!isLoading && notifications.length === 0 && <p className="py-12 text-center text-gray-500">Beeksisni hin jiru.</p>}
       <div className="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white">{notifications.map((notification) => {
         const content = <div className={`px-4 py-4 ${notification.isRead ? '' : 'bg-blue-50'}`}><p className="text-xs text-gray-800">{notification.actor?.name ? `${notification.actor.name}: ` : ''}{notification.message}</p><p className="mt-1 text-xs text-gray-500">{formatRelativeDate(notification.createdAt)}</p></div>;

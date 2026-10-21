@@ -91,7 +91,7 @@ export default function RegisterPage() {
           textAlign: 'center',
         }}
       >
-        Barruu keessatti galmaa'i
+        Barruu keessatti galmaa&apos;i
       </h1>
       <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '20px', textAlign: 'center' }}>
         Akaawuntii kee uumii, barruu kee qoodi.

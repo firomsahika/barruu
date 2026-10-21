@@ -15,7 +15,6 @@ import {
   Wheat,
   Mic2,
   Search,
-  ArrowRight,
   LogIn,
   UserPlus,
   Hash,
@@ -23,6 +22,7 @@ import {
 
 import { useTags } from '@/hooks/useTags';
 import { useAuthStore } from '@/store/authStore';
+import { Tag } from '@/types';
 
 const mainNavItems = [
   {
@@ -133,7 +133,7 @@ export default function LeftSidebar() {
   const [tagFilter, setTagFilter] = useState('');
 
   const filteredTags = tags
-    .filter((tag: any) =>
+    .filter((tag: Tag) =>
       tag.name
         .toLowerCase()
         .includes(tagFilter.toLowerCase())
@@ -228,7 +228,7 @@ export default function LeftSidebar() {
                     className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-bold text-slate-950 transition-all hover:bg-slate-100"
                   >
                     <UserPlus className="h-3.5 w-3.5" />
-                    Galmaa'i
+                    Galmaa&apos;i
                   </Link>
 
                   <Link
@@ -258,7 +258,7 @@ export default function LeftSidebar() {
               </div>
 
               <span className="text-[9px] text-slate-300">
-                Baay'ee fayyadaman
+                Baay&apos;ee fayyadaman
               </span>
             </div>
 
@@ -282,7 +282,7 @@ export default function LeftSidebar() {
 
             <div className="mt-1.5 space-y-0.5">
               {filteredTags.length > 0 ? (
-                filteredTags.map((tag: any) => (
+                filteredTags.map((tag: Tag) => (
                   <Link
                     key={tag.slug}
                     href={`/tag/${tag.slug}`}

@@ -21,7 +21,6 @@ import {
   ChevronDown,
   ChevronRight,
   Send,
-  Copy,
 } from 'lucide-react';
 
 import Header from '@/components/Header';
@@ -360,7 +359,7 @@ function AuthorSidebar({
 
       <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
         <h3 className="mb-4 text-sm font-bold text-slate-950">
-          Waa'ee barruu
+          Waa&apos;ee barruu
         </h3>
 
         <div className="space-y-3">
@@ -926,7 +925,7 @@ export default function ArticleDetailPage() {
               className="mb-3 inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-white hover:text-slate-900 xl:hidden"
             >
               <ArrowLeft className="h-4 w-4" />
-              Deebi'i
+              Deebi&apos;i
             </button>
 
             {/* ============================================================ */}
@@ -1172,7 +1171,7 @@ export default function ArticleDetailPage() {
               >
                 <span className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <MoreHorizontal className="h-4 w-4 text-slate-400" />
-                  Waa'ee barreessaa fi barruu
+                  Waa&apos;ee barreessaa fi barruu
                 </span>
 
                 {showMobileInfo ? (
@@ -1274,7 +1273,7 @@ export default function ArticleDetailPage() {
                     href="/register"
                     className="font-bold text-slate-900 underline underline-offset-2"
                   >
-                    galmaa'i
+                    galmaa&apos;i
                   </Link>
                   .
                 </div>
@@ -1289,7 +1288,7 @@ export default function ArticleDetailPage() {
 
                     <p className="mt-2 text-xs text-slate-400">
                       Yaadni hin jiru.
-                      Jalqabaa ta'i!
+                      Jalqabaa ta&apos;i!
                     </p>
                   </div>
                 ) : (

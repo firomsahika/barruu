@@ -7,7 +7,7 @@ import { Calendar, FileText, MessageCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import ArticleCard from '@/components/ArticleCard';
 import api from '@/lib/api';
-import { Article, getAvatarUrl, formatDate, CATEGORY_LABELS } from '@/types';
+import { Article, getAvatarUrl, formatDate } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { useFollowUser, useFollowing } from '@/hooks/useUserActions';
 import toast from 'react-hot-toast';
@@ -31,9 +31,9 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<'articles' | 'comments'>('articles');
-  const [isFollowing, setIsFollowing] = useState(false);
   const { data: following = [] } = useFollowing(!!currentUser);
   const followUser = useFollowUser();
+  const isFollowing = profile ? following.some((followed) => followed.id === profile.id) : false;
 
   useEffect(() => {
     api.get(`/users/${username}`)
@@ -41,12 +41,6 @@ export default function UserProfilePage() {
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, [username]);
-
-  useEffect(() => {
-    if (profile) {
-      setIsFollowing(following.some((followed) => followed.id === profile.id));
-    }
-  }, [following, profile]);
 
   if (isLoading) {
     return (
@@ -80,7 +74,6 @@ export default function UserProfilePage() {
     }
     try {
       await followUser.mutateAsync({ followeeId: profile.id, following: isFollowing });
-      setIsFollowing(!isFollowing);
     } catch (error: unknown) {
       toast.error((error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Hordofuu hin dandeenye.');
     }

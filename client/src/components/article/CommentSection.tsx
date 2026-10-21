@@ -113,7 +113,7 @@ export default function CommentsSection({
             {comments.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '32px', color: '#9ca3af', fontSize: '15px' }}>
                     <MessageCircle size={32} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
-                    <p>Yaadni hin jiru. Jalqabaa ta'i!</p>
+                    <p>Yaadni hin jiru. Jalqabaa ta&apos;i!</p>
                 </div>
             ) : (
                 comments.map((comment) => (

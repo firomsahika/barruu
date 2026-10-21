@@ -1,0 +1,55 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-lint:
+    name: Lint, Test & Build (Monorepo)
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+
+      - name: Install Server Dependencies
+        run: npm --prefix server ci
+
+      - name: Install Client Dependencies
+        run: npm --prefix client ci
+
+      - name: Generate Prisma Client
+        run: npm --prefix server run prisma:generate
+
+      - name: Run Client Linting
+        run: npm --prefix client run lint
+
+      - name: Run Server Type-check & Build
+        run: npm --prefix server run build
+
+      - name: Run Server Unit Tests
+        run: npm --prefix server test
+
+      - name: Run Client Unit Tests
+        run: npm --prefix client test
+
+      - name: Build Client Production Bundle
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:5000/api
+        run: npm --prefix client run build

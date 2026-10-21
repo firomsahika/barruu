@@ -95,7 +95,7 @@ export default function CategoryPage() {
 
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
                 Kutaan barruu ati barbaadde hin argamne.
-                Mee gara fuula barruulee deebi'i.
+                Mee gara fuula barruulee deebi&apos;i.
               </p>
 
               <Link
@@ -136,7 +136,7 @@ export default function CategoryPage() {
               className="group mb-8 inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900"
             >
               <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
-              Deebi'i
+              Deebi&apos;i
             </Link>
 
             {/* Category hero */}
@@ -278,12 +278,12 @@ export default function CategoryPage() {
               </div>
 
               <h2 className="text-base font-bold text-slate-900">
-                Barruulee fe'uu hin dandeenye
+                Barruulee fe&apos;uu hin dandeenye
               </h2>
 
               <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
                 Rakkoon tokko uumameera. Mee yeroo
-                muraasa booda irra deebi'ii yaali.
+                muraasa booda irra deebi&apos;ii yaali.
               </p>
             </div>
           )}
@@ -310,7 +310,7 @@ export default function CategoryPage() {
                 </h2>
 
                 <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                  Barruun jalqabaa kutaa kanaa ta'uuf
+                  Barruun jalqabaa kutaa kanaa ta&apos;uuf
                   yaada kee qoodi.
                 </p>
 

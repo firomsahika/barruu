@@ -1,0 +1,36 @@
+name: Security Scan & Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly run on Sundays
+
+jobs:
+  audit:
+    name: Dependency Audit & CodeQL Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      - name: Server Dependency Audit
+        run: npm --prefix server audit --audit-level=high || true
+
+      - name: Client Dependency Audit
+        run: npm --prefix client audit --audit-level=high || true

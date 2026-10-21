@@ -24,8 +24,8 @@ export default function TagPage() {
           </Link>
         </div>
 
-        {isLoading && <p className="py-12 text-center text-gray-500">Fe'aa jira...</p>}
-        {isError && <p className="py-12 text-center text-red-600">Barruulee fe'uu hin dandeenye.</p>}
+        {isLoading && <p className="py-12 text-center text-gray-500">Fe&apos;aa jira...</p>}
+        {isError && <p className="py-12 text-center text-red-600">Barruulee fe&apos;uu hin dandeenye.</p>}
         {!isLoading && !isError && data?.articles.length === 0 && (
           <p className="py-12 text-center text-gray-500">Teg kanaan barruun hin jiru.</p>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -131,7 +131,7 @@ function SettingSection({
 /* Page                                                                      */
 /* ========================================================================= */
 
-export default function WritePage() {
+function WritePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -1708,6 +1708,14 @@ export default function WritePage() {
       </div>
 
     </div>
+  );
+}
+
+export default function WritePage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-xs text-slate-500">Fe&apos;aa jira...</div>}>
+      <WritePageContent />
+    </Suspense>
   );
 }
 
