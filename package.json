@@ -18,6 +18,7 @@
     "lint": "npm run lint:client && npm run lint:server",
     "test:server": "npm --prefix server test",
     "test:client": "npm --prefix client test",
+    "test:coverage": "npm --prefix server run test:coverage",
     "test": "npm run test:server && npm run test:client",
     "prisma:generate": "npm --prefix server run prisma:generate",
     "prisma:migrate": "npm --prefix server run prisma:migrate"

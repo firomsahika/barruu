@@ -30,7 +30,8 @@ jobs:
         uses: github/codeql-action/analyze@v3
 
       - name: Server Dependency Audit
-        run: npm --prefix server audit --audit-level=high || true
+        run: npm --prefix server audit --audit-level=critical
 
       - name: Client Dependency Audit
-        run: npm --prefix client audit --audit-level=high || true
+        run: npm --prefix client audit --audit-level=critical
+

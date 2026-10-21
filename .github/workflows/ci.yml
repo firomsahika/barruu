@@ -46,6 +46,9 @@ jobs:
       - name: Run Server Unit Tests
         run: npm --prefix server test
 
+      - name: Run Server Test Coverage Check
+        run: npm --prefix server run test:coverage
+
       - name: Run Client Unit Tests
         run: npm --prefix client test
 
