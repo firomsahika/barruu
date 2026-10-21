@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Editor } from '@tiptap/react';
+import '@tiptap/starter-kit';
 import {
   Bold,
   Italic,
@@ -54,10 +55,13 @@ export interface ToolbarProps {
 export function Toolbar({ editor }: ToolbarProps) {
   if (!editor) return null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chain = () => (editor.chain().focus() as any);
+
   const handleSetLink = () => {
     const url = window.prompt('URL galchaa:');
     if (!url) return;
-    editor.chain().focus().setLink({ href: url }).run();
+    chain().setLink({ href: url }).run();
   };
 
   return (
@@ -66,7 +70,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <ToolbarButton
           title="Bold"
           active={editor.isActive('bold')}
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          onClick={() => chain().toggleBold().run()}
         >
           <Bold className="h-4 w-4" />
         </ToolbarButton>
@@ -74,7 +78,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <ToolbarButton
           title="Italic"
           active={editor.isActive('italic')}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          onClick={() => chain().toggleItalic().run()}
         >
           <Italic className="h-4 w-4" />
         </ToolbarButton>
@@ -92,7 +96,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <ToolbarButton
           title="Bullet list"
           active={editor.isActive('bulletList')}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          onClick={() => chain().toggleBulletList().run()}
         >
           <List className="h-4 w-4" />
         </ToolbarButton>
@@ -100,7 +104,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <ToolbarButton
           title="Ordered list"
           active={editor.isActive('orderedList')}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          onClick={() => chain().toggleOrderedList().run()}
         >
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
@@ -108,7 +112,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <ToolbarButton
           title="Heading"
           active={editor.isActive('heading', { level: 2 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() => chain().toggleHeading({ level: 2 }).run()}
         >
           <Heading2 className="h-4 w-4" />
         </ToolbarButton>
@@ -116,7 +120,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <ToolbarButton
           title="Quote"
           active={editor.isActive('blockquote')}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          onClick={() => chain().toggleBlockquote().run()}
         >
           <Quote className="h-4 w-4" />
         </ToolbarButton>
@@ -124,14 +128,14 @@ export function Toolbar({ editor }: ToolbarProps) {
         <ToolbarButton
           title="Code block"
           active={editor.isActive('codeBlock')}
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          onClick={() => chain().toggleCodeBlock().run()}
         >
           <Code className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarButton
           title="Horizontal rule"
-          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          onClick={() => chain().setHorizontalRule().run()}
         >
           <Minus className="h-4 w-4" />
         </ToolbarButton>
