@@ -20,7 +20,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "^6.19.2",
+    "@prisma/client": "^7.10.1",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
     "express": "^5.2.1",
