@@ -5,6 +5,7 @@ import slugify from 'slug';
 import { ArticleController } from '../controllers/article.controller';
 import { NotificationService } from '../services/notification.service';
 import { ArticleService } from '../services/article.service';
+import { logger } from '../lib/logger';
 
 const router = Router();
 const calculateReadingTime = ArticleService.calculateReadingTime;
@@ -82,7 +83,7 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response): Prom
 
     res.json(article);
   } catch (error) {
-    console.error('Update article error:', error);
+    logger.error({ err: error, route: req.path }, 'Update article error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });
@@ -107,7 +108,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response): Pro
     await prisma.article.delete({ where: { id } });
     res.json({ message: 'Barruu haqame' });
   } catch (error) {
-    console.error('Delete article error:', error);
+    logger.error({ err: error, route: req.path }, 'Delete article error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });
@@ -154,7 +155,7 @@ router.post('/:id/react', authenticate, async (req: AuthRequest, res: Response):
       res.json({ reacted: true, type });
     }
   } catch (error) {
-    console.error('React error:', error);
+    logger.error({ err: error, route: req.path }, 'React error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });
@@ -185,7 +186,7 @@ router.post('/:id/bookmark', authenticate, async (req: AuthRequest, res: Respons
       res.json({ bookmarked: true });
     }
   } catch (error) {
-    console.error('Bookmark error:', error);
+    logger.error({ err: error, route: req.path }, 'Bookmark error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });
@@ -238,7 +239,7 @@ router.post('/:id/comments', authenticate, async (req: AuthRequest, res: Respons
 
     res.status(201).json(comment);
   } catch (error) {
-    console.error('Comment error:', error);
+    logger.error({ err: error, route: req.path }, 'Comment error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });

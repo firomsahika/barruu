@@ -55,6 +55,18 @@ describe('Article Controller & Routes API Tests', () => {
       assert.equal(res.body.articles[0].title, 'Asoosama Bareedaa');
       assert.equal(res.body.pagination.total, 1);
     });
+
+    test('returns 400 when invalid category is supplied', async () => {
+      const res = await request(app).get('/api/articles?category=INVALID_CATEGORY');
+      assert.equal(res.status, 400);
+      assert(res.body.error);
+    });
+
+    test('returns 400 when non-numeric page is supplied', async () => {
+      const res = await request(app).get('/api/articles?page=invalid-page');
+      assert.equal(res.status, 400);
+      assert(res.body.error);
+    });
   });
 
   describe('GET /api/articles/:slug', () => {
