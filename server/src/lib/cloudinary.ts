@@ -70,7 +70,7 @@ class InMemoryFakeCloudinaryClient implements CloudinaryClient {
       url: `http://localhost:5000/fake-media/${fakeId}.webp`,
       secure_url: `https://res.cloudinary.com/fake-cloud/image/upload/${options.folder}/${fakeId}.webp`,
       access_mode: 'public',
-    } as UploadApiResponse;
+    } as unknown as UploadApiResponse;
   }
 }
 
