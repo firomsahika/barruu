@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
           skipComments: true,
         },
       ],
+      "@next/next/no-img-element": "off",
     },
   },
   // Override default ignores of eslint-config-next.

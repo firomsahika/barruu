@@ -11,6 +11,7 @@
         "skipBlankLines": true,
         "skipComments": true
       }
-    ]
+    ],
+    "@next/next/no-img-element": "off"
   }
 }
