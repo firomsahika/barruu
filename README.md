@@ -327,6 +327,7 @@ For detailed endpoint payloads, query parameters, status codes, and error repres
 | `PATCH`| `/api/notifications/mark-all-read` | Mark all notifications as read | **Yes** |
 | `POST` | `/api/uploads/image` | Upload image to Cloudinary storage | **Yes** |
 | `GET` | `/api/health` | Health check endpoint | No |
+| `GET` | `/api/metrics` | Prometheus metrics scrape endpoint | No |
 
 ---
 
@@ -420,6 +421,8 @@ Visit `http://localhost:3000` in your browser.
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary storage cloud identifier | `your_cloud_name` |
 | `CLOUDINARY_API_KEY` | Cloudinary API Key | `your_api_key` |
 | `CLOUDINARY_API_SECRET` | Cloudinary API Secret | `your_api_secret` |
+| `SENTRY_DSN` | Sentry error tracking ingestion DSN URL | `https://publicKey@o0.ingest.sentry.io/0` |
+
 
 ### Client (`client/.env.local`)
 | Variable | Description | Default / Example |

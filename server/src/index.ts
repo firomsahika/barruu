@@ -63,11 +63,24 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './lib/logger';
+import { register, httpRequestCounter, httpRequestDurationHistogram } from './lib/metrics';
+import { initErrorTracking } from './lib/errorTracking';
 
-// Request logging middleware
+initErrorTracking();
+
+// Request logging and Prometheus metrics middleware
 app.use((req, res, next) => {
   const start = Date.now();
+  const hrStart = process.hrtime();
   res.on('finish', () => {
+    const diff = process.hrtime(hrStart);
+    const durationSeconds = diff[0] + diff[1] / 1e9;
+    const route = req.route ? req.baseUrl + req.route.path : req.path;
+    const statusCode = res.statusCode.toString();
+
+    httpRequestCounter.inc({ method: req.method, route, status_code: statusCode });
+    httpRequestDurationHistogram.observe({ method: req.method, route, status_code: statusCode }, durationSeconds);
+
     logger.info(`${req.method} ${req.originalUrl || req.url}`, {
       method: req.method,
       path: req.originalUrl || req.url,
@@ -92,8 +105,15 @@ app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Siidaa Barruu API is running' });
 });
 
+// Prometheus metrics endpoint
+app.get('/api/metrics', async (_req: Request, res: Response) => {
+  res.setHeader('Content-Type', register.contentType);
+  res.send(await register.metrics());
+});
+
 // Centralized error handler
 app.use(errorHandler);
+
 
 // Start server
 if (process.env.NODE_ENV !== 'test') {

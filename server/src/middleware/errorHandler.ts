@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { ZodError } from 'zod';
+import { captureException } from '../lib/errorTracking';
 
 export function errorHandler(
   err: unknown,
@@ -50,6 +51,8 @@ export function errorHandler(
   }
 
   // 3. Unhandled Server Error
+  captureException(err, { reqId, path, method });
+
   logger.error('Unhandled internal server error', err, {
     reqId,
     path,
