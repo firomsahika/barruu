@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -28,7 +29,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response): Pro
     await prisma.comment.delete({ where: { id } });
     res.json({ message: 'Yaada haqame' });
   } catch (error) {
-    console.error('Delete comment error:', error);
+    logger.error({ err: error, route: req.path }, 'Delete comment error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });
@@ -65,7 +66,7 @@ router.patch('/:id', authenticate, async (req: AuthRequest, res: Response): Prom
 
     res.json(updated);
   } catch (error) {
-    console.error('Update comment error:', error);
+    logger.error({ err: error, route: req.path }, 'Update comment error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });

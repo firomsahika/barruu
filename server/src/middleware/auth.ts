@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { logger } from '../lib/logger';
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     email: string;
     role: string;
+    username?: string;
   };
 }
 
@@ -20,7 +22,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
   const token = authHeader.split(' ')[1];
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    console.error('JWT_SECRET is not configured');
+    logger.error('JWT_SECRET is not configured');
     res.status(503).json({ error: 'Tajaajilli yeroo kana hin qophoofne' });
     return;
   }

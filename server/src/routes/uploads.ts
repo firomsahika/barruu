@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { uploadImage } from '../services/upload.service';
 import multer from 'multer';
+import { logger } from '../lib/logger';
 
 const router = Router();
 const upload = multer({
@@ -45,7 +46,7 @@ router.post('/image', authenticate, upload.single('image'), async (req: AuthRequ
       res.status(413).json({ error: 'Fakkiin guddaan 5MB caaluu hin qabu' });
       return;
     }
-    console.error('Image upload error:', error);
+    logger.error({ err: error, route: req.path }, 'Image upload error');
     res.status(500).json({ error: 'Fakkii olkaa\'uu hin dandeenye' });
   }
 });

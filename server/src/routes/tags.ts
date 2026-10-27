@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     });
     res.json(tags);
   } catch (error) {
-    console.error('Get tags error:', error);
+    logger.error({ err: error, route: req.path }, 'Get tags error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });
@@ -51,7 +52,7 @@ router.get('/:slug', async (req: Request, res: Response): Promise<void> => {
 
     res.json(tag);
   } catch (error) {
-    console.error('Get tag error:', error);
+    logger.error({ err: error, route: req.path }, 'Get tag error');
     res.status(500).json({ error: 'Dogoggora serverii' });
   }
 });
