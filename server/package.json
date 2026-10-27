@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "NODE_ENV=test tsx --test \"src/**/*.test.ts\"",
-    "test:coverage": "NODE_ENV=test c8 --all --include=\"src/lib/**\" --include=\"src/validations/**\" --include=\"src/middleware/**\" --exclude=\"src/**/*.test.ts\" --exclude=\"src/tests/**\" --exclude=\"src/__tests__/**\" --check-coverage --lines 50 tsx --test \"src/**/*.test.ts\"",
+    "test": "NODE_ENV=test tsx --test src/**/*.test.ts",
+    "test:coverage": "NODE_ENV=test c8 --all --include=\"src/lib/**\" --include=\"src/validations/**\" --include=\"src/middleware/**\" --exclude=\"src/**/*.test.ts\" --check-coverage --lines 70 node --import tsx --test src/**/*.test.ts",
     "lint": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
