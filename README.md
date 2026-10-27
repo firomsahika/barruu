@@ -377,6 +377,11 @@ npm --prefix server install
 npm --prefix client install
 ```
 
+> [!IMPORTANT]
+> **Deterministic Installs & Monorepo Lockfile Discipline**:
+> Both `server/package-lock.json` and `client/package-lock.json` are committed to version control to guarantee reproducible, zero-drift builds across developer machines and CI/CD pipelines. Whenever dependencies are updated or added, both workspace lockfiles must be updated and committed together.
+
+
 #### 4. Database Migration & Schema Generation
 ```bash
 # Generate Prisma Client
@@ -425,7 +430,7 @@ Visit `http://localhost:3000` in your browser.
 
 ## 🧪 Testing & Quality Assurance
 
-Siidaa Barruu includes 40 comprehensive automated test suites covering input validations, business calculation rules, auth middleware guards, notification distribution, and frontend utilities.
+Siidaa Barruu includes comprehensive automated test suites covering input validations, domain business rules, auth middleware guards, centralized error handling, structured logging, and frontend utility functions.
 
 ### Run All Tests
 ```bash
@@ -438,14 +443,21 @@ npm test
 npm --prefix server test
 ```
 
+### Run Server Test Coverage Check (Enforced Threshold)
+```bash
+# Executes c8 coverage runner and enforces a minimum 70% line coverage threshold
+npm --prefix server run test:coverage
+```
+*Continuous integration (CI) automatically checks this threshold on every pull request and push to main, failing the build if coverage regresses below 70%.*
+
 ### Run Client Tests
 ```bash
 npm --prefix client test
 ```
 
-### Run Linting & Type-Checking
+### Run Linting & Code Quality
 ```bash
-# Verify both TypeScript compilation and ESLint compliance
+# Verify both TypeScript compilation and ESLint compliance (zero warnings)
 npm run lint
 ```
 
@@ -454,11 +466,14 @@ npm run lint
 ## 🛡 Security & Compliance
 
 - **No Plaintext Passwords**: Uses salted Bcrypt hashing (`cost = 10`).
-- **Strict Payload Validation**: All incoming requests are validated against Zod schemas, stripping unrecognized properties and blocking SQL/NoSQL injection vectors.
+- **Strict Payload & Query Validation**: All incoming requests and query parameters are validated against Zod schemas, stripping unrecognized properties and preventing injection vectors.
+- **Structured JSON Logging**: Centralized logger (`server/src/lib/logger.ts`) emitting structured NDJSON with contextual request metadata, sanitized error traces, and runtime `LOG_LEVEL` filtering.
+- **Enterprise Secret Manager Integration**: Production deployments support automated credential injection from AWS Secrets Manager, HashiCorp Vault, or Doppler. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#7-enterprise-secret-manager-integration) for architecture patterns and bootstrapping examples.
 - **OWASP Secure HTTP Headers**: Express headers include `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy`.
 - **Stateless Bearer JWTs**: Fast, distributed cryptographic authorization with granular role-based access control (`USER`, `ADMIN`).
 - **Safe HTML Rendering**: Frontend sanitizes and controls rich text rendering to prevent XSS.
 - **Secret Isolation**: All credentials, tokens, and storage keys are managed strictly via environment variables and excluded from version control.
+
 
 ---
 

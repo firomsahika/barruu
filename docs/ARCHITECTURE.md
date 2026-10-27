@@ -138,4 +138,74 @@ sequenceDiagram
 | **Password Storage** | Salted SHA-512 with Bcrypt (`rounds: 10`). Plaintext is never stored or logged. |
 | **Input Validation** | Strict Zod schema parsing; unrecognized properties are pruned; types are enforced before hitting services. |
 | **Circular Dependency Prevention**| Decoupled Socket.IO instance provider in `lib/socket.ts` eliminates circular imports between HTTP server and domain services. |
-| **Secrets Management** | Zero credentials in source code. `.env` files are git-ignored and validated on server boot. |
+| **Secrets Management** | Zero credentials in source code. `.env` files are git-ignored and validated on server boot. Supports enterprise secret managers. |
+
+---
+
+## 6. Observability, Logging & Error Tracking
+
+Siidaa Barruu implements centralized structured logging and uniform error handling across all backend services:
+
+### Structured JSON Logger (`server/src/lib/logger.ts`)
+- Outputs NDJSON formatted entries containing ISO timestamps, log level (`trace`, `debug`, `info`, `warn`, `error`, `fatal`), message, and context metadata.
+- Automatically captures and serializes error details (`name`, `message`, `stack`) while omitting sensitive credentials.
+- Configurable at runtime via `LOG_LEVEL` environment variable (defaults to `info` in production, `debug` in development/test).
+- Compatible with log collectors and monitoring platforms (Datadog, AWS CloudWatch, Logstash, Loki, Papertrail).
+
+```json
+{"timestamp":"2026-10-27T20:45:00.000Z","level":"error","message":"Failed to fetch articles","context":{"path":"/api/articles","method":"GET","statusCode":500},"err":{"message":"Database connection timeout","name":"PrismaClientKnownRequestError"}}
+```
+
+### Centralized Error Middleware (`server/src/middleware/errorHandler.ts`)
+- **`AppError`**: Custom operational error class containing an HTTP status code, operational flag, and descriptive error message.
+- **`ZodError`**: Traps validation failures and formats structured 400 Bad Request responses with detailed field-level issue lists.
+- **Unhandled Exceptions**: Catches unexpected errors, logs a structured error stack trace with contextual request metadata, and returns a sanitized 500 error payload (`"Internal Server Error"`) to avoid leaking implementation details.
+
+---
+
+## 7. Enterprise Secret Manager Integration
+
+In production environments, credentials, encryption keys, and database connection strings should never reside on disk. Barruu supports dynamic secret injection using standard Cloud Secret Managers:
+
+### Supported Secret Providers
+- **AWS Secrets Manager / AWS Systems Manager Parameter Store**
+- **HashiCorp Vault**
+- **Doppler / Infisical**
+- **GCP Secret Manager**
+
+### Architecture Pattern: Secret Bootstrap Loader
+A pre-boot initialization step fetches secrets before starting the Express application listener:
+
+```typescript
+// server/src/lib/secrets.ts (Optional Cloud Integration)
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { logger } from './logger';
+
+export async function loadProductionSecrets(): Promise<void> {
+  if (process.env.NODE_ENV !== 'production' || !process.env.AWS_SECRET_ID) {
+    return;
+  }
+
+  try {
+    const client = new SecretsManagerClient({ region: process.env.AWS_REGION || 'us-east-1' });
+    const response = await client.send(
+      new GetSecretValueCommand({ SecretId: process.env.AWS_SECRET_ID })
+    );
+
+    if (response.SecretString) {
+      const secrets = JSON.parse(response.SecretString);
+      process.env.DATABASE_URL = secrets.DATABASE_URL || process.env.DATABASE_URL;
+      process.env.JWT_SECRET = secrets.JWT_SECRET || process.env.JWT_SECRET;
+      process.env.CLOUDINARY_API_SECRET = secrets.CLOUDINARY_API_SECRET || process.env.CLOUDINARY_API_SECRET;
+      logger.info('Successfully injected secrets from AWS Secrets Manager');
+    }
+  } catch (error) {
+    logger.error('Failed to load secrets from Secrets Manager', error);
+    process.exit(1);
+  }
+}
+```
+
+### Doppler / Kubernetes Secret Injection
+In containerized deployments (Kubernetes, AWS ECS, or Docker Swarm), secrets can be injected directly into the container process environment using secret operators (e.g., Doppler CLI `doppler run -- npm start` or Kubernetes `Secret` volume/env bindings), eliminating the need for application-level SDKs while keeping credentials completely out of Git history.
+
